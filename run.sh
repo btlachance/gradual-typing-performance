@@ -1,7 +1,7 @@
 #!/bin/bash
 #############################################################################
 # Parameters
-RKT=$HOME/code/racket/6.2/bin
+RKT=/usr/local/racket/racket/bin/
 
 ## Default jobs: compute number of cores, divide by 2
 if hash nproc 2>/dev/null; then
@@ -11,10 +11,11 @@ elif hash sysctl 2>/dev/null; then
 else
   CORES=2 # So we get 1 job
 fi
-JOBS=$((CORES / 2))
+JOBS=1
 
 TARGET=${1%/}
 LOG=$TARGET.log
+NUMITERS=${NUMITERS:-1}
 
 ###############################################################################
 ## Main script
@@ -24,5 +25,5 @@ if test $NUMITERS; then
 fi
 $RKT/raco pkg update tools/benchmark-util
 $RKT/racket tools/setup-benchmark.rkt $TARGET
-$RKT/racket tools/run.rkt -n -i 1 -j $JOBS -r $RKT $TARGET | tee $LOG
+$RKT/racket tools/run.rkt -n -i $NUMITERS -j $JOBS -r $RKT $TARGET | tee $LOG
 echo "### Saved logfile to '"$LOG"'"

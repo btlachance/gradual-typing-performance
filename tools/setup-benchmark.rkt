@@ -137,11 +137,8 @@
 ;; Integer -> [Listof Combination]
 (define (build-combinations* n)
   [when (< n 1) (error "No combinations of length 0")]
-  (let build-combinations ([n n])
-    (cond
-      [(= n 1) (list (list 0) (list 1))]
-      [else (let ([last (build-combinations (sub1 n))])
-              (append (map (curry cons 0) last) (map (curry cons 1) last)))])))
+  (list (build-list n (λ _ 0))
+        (build-list n (λ _ 1))))
 
 ;; ---------------------------------------------------------------------------------------------------
 

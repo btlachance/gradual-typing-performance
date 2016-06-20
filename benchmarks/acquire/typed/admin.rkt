@@ -18,8 +18,9 @@
  "board-adapted.rkt"
  "state-adapted.rkt"
  "tree-adapted.rkt"
+ typed/racket/unsafe
 )
-(require/typed racket/sandbox
+(unsafe-require/typed racket/sandbox
   (call-with-limits (All (A) (-> Natural Natural (-> A) A)))
   (exn:fail:resource? (All (A) (-> A Boolean)))
 )

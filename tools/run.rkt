@@ -77,7 +77,7 @@
 (define exclusive-config (make-parameter #f))
 (define min-max-config (make-parameter #f))
 (define *racket-bin* (make-parameter "")) ;; Path-String
-(define *AFFINITY?* (make-parameter #t)) ;; Boolean
+(define *AFFINITY?* (make-parameter #f)) ;; Boolean
 (define *ERROR-MESSAGES* (make-parameter '())) ;; (Listof String)
 (define *DATA-TMPFILE* (make-parameter #f))
 (define *TIME-TMPFILE* (make-parameter "time.tmp"))
@@ -115,13 +115,8 @@
   (define num-modules
     (for/sum ([fname (in-list (directory-list (build-path basepath "untyped")))]
               #:when (regexp-match? "\\.rkt$" (path->string fname))) 1))
-  (for/list ([i (in-range (expt 2 num-modules))])
-    (define bits
-      (if (zero? i)
-        (make-string num-modules #\0)
-        (~r i #:base 2 #:min-width num-modules #:pad-string "0")))
-    (define var-str (format "configuration~a" bits))
-    (build-path basepath "benchmark" var-str entry-point)))
+  (list (build-path basepath "benchmark" (~a "configuration" (make-string num-modules #\0)) entry-point)
+        (build-path basepath "benchmark" (~a "configuration" (make-string num-modules #\1)) entry-point)))
 
 ;; Start a thread to monitor CPU temperature
 ;; Delay before returning

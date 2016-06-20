@@ -15,6 +15,7 @@
   "../base/types.rkt"
   "board-adapted.rkt"
   "state-adapted.rkt"
+  typed/racket/unsafe
 )
 
 ;; -----------------------------------------------------------------------------
@@ -62,7 +63,7 @@
 
 ;; -----------------------------------------------------------------------------
 
-(require/typed "tree.rkt"
+(unsafe-require/typed "tree.rkt"
   (#:opaque HandOut hand-out?)
   (lplaced% LPlaced%)
   (generate-tree (-> State (Instance ATree%)))
