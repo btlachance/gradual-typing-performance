@@ -4,9 +4,10 @@
          "tetras.rkt")  
 
 (provide
- list-pick-random
- neg-1
- tetras)
+ (contract-out
+  [list-pick-random ((listof TETRA/C) . -> . TETRA/C)]
+  [neg-1 integer?]
+  [tetras (listof TETRA/C)]))
 
 (define r (make-pseudo-random-generator))
 (parameterize ((current-pseudo-random-generator r))

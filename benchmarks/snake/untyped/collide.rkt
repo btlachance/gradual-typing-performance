@@ -25,5 +25,6 @@
         [else (or (posn=? (car segs) h)
                   (segs-self-collide? h (cdr segs)))]))
 (provide
- snake-wall-collide?
- snake-self-collide?)
+ (contract-out
+  [snake-wall-collide? (SNAKE/C . -> . boolean?)]
+  [snake-self-collide? (SNAKE/C . -> . boolean?)]))

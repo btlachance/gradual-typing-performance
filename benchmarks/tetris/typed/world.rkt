@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data.rkt")
 (require benchmark-util)
 (require/typed/check "bset.rkt"
    [blocks-union (-> BSet BSet BSet)]
@@ -23,9 +23,11 @@
   [board-height Integer]
   [board-width Integer])
 
-(provide world-key-move
-         next-world
-         ghost-blocks)
+(provide
+ (contract-out
+  [world-key-move (WORLD/C string? . ->/c . WORLD/C)]
+  [next-world (WORLD/C . ->/c . WORLD/C)]
+  [ghost-blocks (WORLD/C . ->/c . BSET/C)]))
 
 ;; Add the current tetra's blocks onto the world's block list,
 ;; and create a new tetra.

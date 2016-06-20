@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "data-adaptor.rkt")
+(require "data.rkt")
 ;; NeSegs is one of:
 ;; - (cons Posn empty)
 ;; - (cons Posn NeSegs)
@@ -14,4 +14,5 @@
           [else (cons (car segs) (cut-tail r))])))
 
 (provide
- cut-tail)
+ (contract-out
+  [cut-tail ((nelistof POSN/C) . ->/c . (listof POSN/C))]))

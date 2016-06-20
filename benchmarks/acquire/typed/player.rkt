@@ -15,7 +15,7 @@
 (require
  benchmark-util
  "../base/types.rkt"
- "state-adapted.rkt"
+ "state.rkt"
 )
 (require/typed/check "admin.rkt"
   (administrator% Administrator%)

@@ -1,26 +1,32 @@
 #lang racket/base
-
+(require racket/contract/base)
 ;; Front-end:
 ;; Working with current clock
 
-(provide;/contract
- current-clock         ;any/c]
- current-posix-seconds ;any/c]
- now/moment            ;(->i () (#:tz [tz tz/c]) [res moment?])]
- now                   ;(->i () (#:tz [tz tz/c]) [res datetime?])]
- today                 ;(->i () (#:tz [tz tz/c]) [res date?])]
- current-time          ;(->i () (#:tz [tz tz/c]) [res time?])]
- now/moment/utc        ;(-> moment?)]
- now/utc               ;(-> datetime?)]
- today/utc             ;(-> date?)]
- current-time/utc      ;(-> time?)])
+(provide
+ (contract-out
+  [current-clock         any/c]
+  [current-posix-seconds any/c]
+  [now/moment            (->i () (#:tz [tz tz/c]) [res moment?])]
+  [now                   (->i () (#:tz [tz tz/c]) [res datetime?])]
+  [today                 (->i () (#:tz [tz tz/c]) [res date?])]
+  [current-time          (->i () (#:tz [tz tz/c]) [res time?])]
+  [now/moment/utc        (-> moment?)]
+  [now/utc               (-> datetime?)]
+  [today/utc             (-> date?)]
+  [current-time/utc      (-> time?)])
  moment->iso8601
  moment->iso8601/tzid
  UTC
- moment
+ Moment
+ moment?
  moment=?
  posix->moment
-)
+ )
+(define moment? Moment?)
+(define datetime? DateTime?)
+(define date? Date?)
+(define time? Time?)
 
 ;; -----------------------------------------------------------------------------
 
@@ -28,21 +34,11 @@
   benchmark-util
   (only-in racket/math exact-round)
   "gregor-structs.rkt"
-)
-(require (only-in "moment.rkt"
-    current-timezone ;(Parameterof (U tz #f))]
-    posix->moment ;(-> Exact-Rational tz Moment)]
-    moment->datetime/local ;(-> Moment DateTime)]
-    UTC ;String]
-    moment ;(->* (Natural) (Month Natural Natural Natural Natural Natural #:tz (U tz #f) #:resolve-offset (-> (U tzgap tzoverlap) DateTime (U String #f) (U #f Moment) Moment)) Moment)]
-    moment=? ;(-> Moment Moment Boolean)]
-    moment->iso8601 ;(-> Moment String)]
-    moment->iso8601/tzid ;(-> Moment String)]
-))
-(require (only-in "datetime.rkt"
-    datetime->date ;(-> DateTime Date)]
-    datetime->time ;(-> DateTime Time)]
-))
+  "tzinfo-adapter.rkt"
+  "moment.rkt"
+  "date.rkt"
+  "datetime.rkt"
+  "time.rkt")
 
 ;; =============================================================================
 

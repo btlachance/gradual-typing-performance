@@ -1,9 +1,7 @@
 #lang typed/racket
 
-(require benchmark-util
-         "data-adaptor.rkt")
-(require/typed/check "cut-tail.rkt"
-                     [cut-tail ((NEListof Posn) . -> . (Listof Posn))])
+(require "data.rkt"
+         "cut-tail.rkt")
 
 ;; next-head : Posn Direction -> Posn
 ;; Compute next position for head.

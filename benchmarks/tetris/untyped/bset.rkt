@@ -93,19 +93,20 @@
   (foldr (λ (b n) (max (block-x b) n)) 0 bs))
 
 (provide
- blocks-contains?
- blocks=?
- blocks-subset?
- blocks-intersect
- blocks-count
- blocks-overflow?
- blocks-move
- blocks-rotate-cw
- blocks-rotate-ccw
- blocks-change-color
- blocks-row
- full-row?
- blocks-union
- blocks-max-x
- blocks-min-x
- blocks-max-y)
+ (contract-out
+  [blocks-contains? (BSET/C BLOCK/C . -> . boolean?)]
+  [blocks=? (BSET/C BSET/C . -> . boolean?)]
+  [blocks-subset? (BSET/C BSET/C . -> . boolean?)]
+  [blocks-intersect (BSET/C BSET/C . -> . BSET/C)]
+  [blocks-count (BSET/C . -> . real?)]
+  [blocks-overflow? (BSET/C . -> . boolean?)]
+  [blocks-move (integer? integer? BSET/C . -> . BSET/C)]
+  [blocks-rotate-cw (POSN/C BSET/C . -> . BSET/C)]
+  [blocks-rotate-ccw (POSN/C BSET/C . -> . BSET/C)]
+  [blocks-change-color (BSET/C COLOR/C . -> . BSET/C)]
+  [blocks-row (BSET/C real? . -> . BSET/C)]
+  [full-row? (BSET/C natural-number/c . -> . boolean?)]
+  [blocks-union (BSET/C BSET/C . -> . BSET/C)]
+  [blocks-max-x (BSET/C . -> . real?)]
+  [blocks-min-x (BSET/C . -> . real?)]
+  [blocks-max-y (BSET/C . -> . real?)]))

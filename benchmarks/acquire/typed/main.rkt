@@ -9,8 +9,8 @@
   benchmark-util
   racket/list
   typed/racket/class
-  "board-adapted.rkt"
-  "state-adapted.rkt"
+  "board.rkt"
+  "state.rkt"
   )
 (require/typed/check "admin.rkt"
   (administrator% Administrator%)

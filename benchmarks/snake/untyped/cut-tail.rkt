@@ -13,4 +13,5 @@
           [else (cons (car segs) (cut-tail r))])))
 
 (provide
- cut-tail)
+ (contract-out
+  [cut-tail ((nelistof POSN/C) . -> . (listof POSN/C))]))

@@ -49,9 +49,11 @@
                            (block x4 y4 color)))))
 
 (provide
- tetra-move
- tetra-rotate-ccw
- tetra-rotate-cw
- tetra-overlaps-blocks?
- build-tetra-blocks
- tetra-change-color)
+ (contract-out
+  [tetra-move (integer? integer? TETRA/C . -> . TETRA/C)]
+  [tetra-rotate-ccw (TETRA/C . -> . TETRA/C)]
+  [tetra-rotate-cw (TETRA/C . -> . TETRA/C)]
+  [tetra-overlaps-blocks? (TETRA/C BSET/C . -> . boolean?)]
+  [build-tetra-blocks (COLOR/C real? real? integer? integer? integer? integer? integer? integer? integer? integer?
+                               . -> . TETRA/C)]
+  [tetra-change-color (TETRA/C COLOR/C . -> . TETRA/C)]))

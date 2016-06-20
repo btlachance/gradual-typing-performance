@@ -1,22 +1,24 @@
 #lang racket/base
 
 ;; Working with dates
-
-(provide;/contract
- date            ;(->i ([year exact-integer?])
-                 ;      ([month (integer-in 1 12)]
-                 ;       [day (year month) (day-of-month/c year month)])
-                 ;      [d date?])]
- date->ymd       ;(-> date? YMD?)]
- date->jdn       ;(-> date? exact-integer?)]
- ymd->date       ;(-> YMD? date?)]
- jdn->date       ;(-> exact-integer? date?)]
- date->iso-week  ;(-> date? (integer-in 1 53))]
- date->iso-wyear ;(-> date? exact-integer?)]
- date->iso8601   ;(-> date? string?)]
- date=?          ;(-> date? date? boolean?)]
- date<=?         ;(-> date? date? boolean?)]
-)
+(require racket/contract/base)
+(provide;
+ (contract-out
+  [date?           (-> any/c boolean?)]
+  [date            (->i ([year natural-number/c])
+                        ([month (integer-in 1 12)]
+                         [day (year month) (day-of-month/c year month)])
+                        [d date?])]
+  [date->ymd       (-> date? YMD?)]
+  [date->jdn       (-> date? exact-integer?)]
+  [ymd->date       (-> YMD? date?)]
+  [jdn->date       (-> exact-integer? date?)]
+  [date->iso-week  (-> date? (integer-in 1 53))]
+  [date->iso-wyear (-> date? exact-integer?)]
+  [date->iso8601   (-> date? string?)]
+  [date=?          (-> date? date? boolean?)]
+  [date<=?         (-> date? date? boolean?)]
+  ))
 
 ;; -----------------------------------------------------------------------------
 
@@ -26,16 +28,8 @@
   benchmark-util
   (only-in racket/math exact-round)
   (only-in racket/format ~r)
-  racket/match)
-
-(require (only-in
-  "ymd.rkt"
-    ymd->jdn ;(-> YMD Integer)]
-    jdn->ymd ;(-> Exact-Rational YMD)]
-    jdn->iso-wday ;(-> Integer (U 0 1 2 3 4 5 6))]
-    ymd->yday ;(-> YMD Natural)]
-    iso-weeks-in-year ;(-> Natural (U 52 53))]
-))
+  racket/match
+  "ymd.rkt")
 
 ;; =============================================================================
 

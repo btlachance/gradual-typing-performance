@@ -26,25 +26,26 @@
 ))
 
 ;; -----------------------------------------------------------------------------
-
+(require racket/contract/base)
 (provide
-         resolve-gap/pre
-         resolve-gap/post
-         resolve-gap/push
+ (contract-out
+  [resolve-gap/pre gap-resolver/c]
+  [resolve-gap/post gap-resolver/c]
+  [resolve-gap/push gap-resolver/c]
 
-         resolve-overlap/pre
-         resolve-overlap/post
-         resolve-overlap/retain
+  [resolve-overlap/pre overlap-resolver/c]
+  [resolve-overlap/post overlap-resolver/c]
+  [resolve-overlap/retain overlap-resolver/c]
 
-         resolve-offset/pre
-         resolve-offset/post
-         resolve-offset/post-gap/pre-overlap
-         resolve-offset/retain
-         resolve-offset/push
-         resolve-offset/raise
+  [resolve-offset/pre offset-resolver/c]
+  [resolve-offset/post offset-resolver/c]
+  [resolve-offset/post-gap/pre-overlap offset-resolver/c]
+  [resolve-offset/retain offset-resolver/c]
+  [resolve-offset/push offset-resolver/c]
+  [resolve-offset/raise offset-resolver/c]
 
-         offset-resolver
-)
+  [offset-resolver (-> gap-resolver/c overlap-resolver/c offset-resolver/c)]
+  [offset-resolver/c any/c]))
 ;; =============================================================================
 
 ;; -- from exn.rkt
@@ -140,3 +141,24 @@
 ;(: resolve-offset/raise (-> (U tzgap tzoverlap) DateTime (U String #f) (U Moment #f) Moment))
 (define (resolve-offset/raise g/o target-dt target-tzid orig)
   (raise-invalid-offset g/o target-dt target-tzid orig))
+
+(define gap-resolver/c
+  (-> tzgap?
+      DateTime?
+      string?
+      (or/c Moment? #f)      
+      Moment?))
+
+(define overlap-resolver/c
+  (-> tzoverlap?
+      DateTime?
+      string?
+      (or/c Moment? #f)      
+      Moment?))
+
+(define offset-resolver/c
+  (-> (or/c tzgap? tzoverlap?)
+      DateTime?
+      string?
+      (or/c Moment? #f)      
+      Moment?))

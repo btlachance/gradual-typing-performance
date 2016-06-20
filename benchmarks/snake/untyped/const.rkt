@@ -12,9 +12,12 @@
                        (posn 8 12)))
 
 (provide
- WORLD
- GRID-SIZE
- BOARD-HEIGHT-PIXELS
- BOARD-WIDTH
- BOARD-HEIGHT)
-
+ (contract-out
+  [WORLD (-> WORLD/C)]
+  ;; [BACKGROUND (->/c image/c)]
+  ;; [FOOD-IMAGE (->/c image/c)]
+  ;; [SEGMENT-IMAGE (->/c image/c)]
+  [GRID-SIZE real?]
+  [BOARD-HEIGHT-PIXELS (-> real?)]
+  [BOARD-WIDTH real?]
+  [BOARD-HEIGHT real?]))

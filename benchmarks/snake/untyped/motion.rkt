@@ -40,5 +40,6 @@
          
          #;(posn (- BOARD-WIDTH 1) (- BOARD-HEIGHT 1))))
 (provide
- world-change-dir
- world->world)
+ (contract-out
+  [world-change-dir (WORLD/C DIR/C . -> . WORLD/C)]
+  [world->world (WORLD/C . -> . WORLD/C)]))

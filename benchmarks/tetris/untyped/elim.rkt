@@ -16,4 +16,5 @@
                             (blocks-move 0 offset (blocks-row
                                                    bs i)))]))
 (provide
- eliminate-full-rows)
+ (contract-out
+  [eliminate-full-rows (BSET/C . -> . BSET/C)]))

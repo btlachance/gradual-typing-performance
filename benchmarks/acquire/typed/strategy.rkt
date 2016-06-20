@@ -14,8 +14,8 @@
 (require
  benchmark-util
  "../base/types.rkt"
- "board-adapted.rkt"
- "state-adapted.rkt"
+ "board.rkt"
+ "state.rkt"
  )
 (require/typed/check "basics.rkt"
   (ALL-HOTELS (Listof Hotel))

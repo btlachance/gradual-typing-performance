@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data.rkt")
 (require benchmark-util)
 (require/typed/check "bset.rkt"
    [blocks-intersect (-> BSet BSet BSet)]
@@ -54,10 +54,11 @@
                            (block x4 y4 color)))))
 
 (provide
- tetra-move
- tetra-rotate-ccw
- tetra-rotate-cw
- tetra-overlaps-blocks?
- build-tetra-blocks
- tetra-change-color)
-
+ (contract-out
+  [tetra-move (integer? integer? TETRA/C . ->/c . TETRA/C)]
+  [tetra-rotate-ccw (TETRA/C . ->/c . TETRA/C)]
+  [tetra-rotate-cw (TETRA/C . ->/c . TETRA/C)]
+  [tetra-overlaps-blocks? (TETRA/C BSET/C . ->/c . boolean?)]
+  [build-tetra-blocks (COLOR/C real? real? integer? integer? integer? integer? integer? integer? integer? integer?
+                               . ->/c . TETRA/C)]
+  [tetra-change-color (TETRA/C COLOR/C . ->/c . TETRA/C)]))

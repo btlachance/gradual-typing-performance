@@ -3,15 +3,18 @@
 ;; Resolving offsets between moments
 
 (require
-  benchmark-util
+  ;benchmark-util
   "tzinfo-adapter.rkt"
   "core-adapter.rkt"
   "gregor-adapter.rkt"
-  racket/match)
-(require/typed/check "hmsn.rkt"
+  racket/match
+  "hmsn.rkt"
+  "datetime.rkt"
+  "moment-base.rkt")
+#;(require/typed "hmsn.rkt"
     [NS/SECOND Natural]
 )
-(require/typed/check "datetime.rkt"
+#;(require/typed "datetime.rkt"
     [datetime->iso8601 (-> DateTime String)]
     [posix->datetime (-> Exact-Rational DateTime)]
     [datetime->posix (-> DateTime Exact-Rational)]
@@ -19,7 +22,7 @@
     [datetime->jd (-> DateTime Exact-Rational)]
     [datetime-add-seconds (-> DateTime Integer DateTime)]
 )
-(require/typed/check "moment-base.rkt"
+#;(require/typed "moment-base.rkt"
     [make-moment (-> DateTime Integer (U String #f) Moment)]
     [moment->iso8601 (-> Moment String)]
     [moment->iso8601/tzid (-> Moment String)]
@@ -28,23 +31,24 @@
 ;; -----------------------------------------------------------------------------
 
 (provide
-         resolve-gap/pre
-         resolve-gap/post
-         resolve-gap/push
+ (contract-out
+  [resolve-gap/pre gap-resolver/c]
+  [resolve-gap/post gap-resolver/c]
+  [resolve-gap/push gap-resolver/c]
 
-         resolve-overlap/pre
-         resolve-overlap/post
-         resolve-overlap/retain
+  [resolve-overlap/pre overlap-resolver/c]
+  [resolve-overlap/post overlap-resolver/c]
+  [resolve-overlap/retain overlap-resolver/c]
 
-         resolve-offset/pre
-         resolve-offset/post
-         resolve-offset/post-gap/pre-overlap
-         resolve-offset/retain
-         resolve-offset/push
-         resolve-offset/raise
+  [resolve-offset/pre offset-resolver/c]
+  [resolve-offset/post offset-resolver/c]
+  [resolve-offset/post-gap/pre-overlap offset-resolver/c]
+  [resolve-offset/retain offset-resolver/c]
+  [resolve-offset/push offset-resolver/c]
+  [resolve-offset/raise offset-resolver/c]
 
-         offset-resolver
-)
+  [offset-resolver (->/c gap-resolver/c overlap-resolver/c offset-resolver/c)]
+  [offset-resolver/c any/c]))
 ;; =============================================================================
 
 ;; -- from exn.rkt
@@ -149,3 +153,24 @@
 (: resolve-offset/raise (-> (U tzgap tzoverlap) DateTime (U String #f) (U Moment #f) Moment))
 (define (resolve-offset/raise g/o target-dt target-tzid orig)
   (raise-invalid-offset g/o target-dt target-tzid orig))
+
+(define gap-resolver/c
+  (->/c tzgap?
+      DateTime?
+      string?
+      (or/c Moment? #f)
+      Moment?))
+
+(define overlap-resolver/c
+  (->/c tzoverlap?
+      DateTime?
+      string?
+      (or/c Moment? #f)
+      Moment?))
+
+(define offset-resolver/c
+  (->/c (or/c tzgap? tzoverlap?)
+      DateTime?
+      string?
+      (or/c Moment? #f)
+      Moment?))

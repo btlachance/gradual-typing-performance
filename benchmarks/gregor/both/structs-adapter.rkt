@@ -7,16 +7,6 @@
   (struct-out HMSN)
   Month)
 
-(require
-  benchmark-util
-  "../base/types.rkt")
-
-(require/typed/check "structs.rkt"
-  [#:struct YMD ([y : Natural]
-                 [m : Month]
-                 [d : Natural])]
-  [#:struct HMSN ([h : Integer]
-                 [m : Integer]
-                 [s : Integer]
-                 [n : Integer])])
+(require "structs.rkt"
+         "../base/types.rkt")
 

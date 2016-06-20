@@ -10,90 +10,124 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (provide
+ (contract-out
+  [tile? (->/c any/c boolean?)]
+  ;; (-> Any Boolean)
 
- (struct-out tile)
- ; tile?
- ; ;; (-> Any Boolean)
+  [tile<=? (->/c tile? tile? boolean?)]
+  ;; (-> Tile Tile Boolean)
 
- tile<=?
- ;; (-> Tile Tile Boolean)
+  [tile->string (->/c tile? string?)]
+  ;; (-> Tile String)
 
- tile->string
- ;; (-> Tile String)
+  [ALL-TILES (and/c (listof tile?) (sorted tile<=?))]
+  ;; (Listof Tile)
+  ;; Postcondition: Sorted
 
- ALL-TILES
- ;; (Listof Tile)
- ;; Postcondition: Sorted
+  [STARTER-TILES# natural-number/c]
+  ;; Natural
 
- STARTER-TILES#
- ;; Natural
+  [FOUNDING symbol?]
+  [GROWING symbol?]
+  [MERGING symbol?]
+  [SINGLETON symbol?]
+  [IMPOSSIBLE symbol?]
+  ;; Symbol
 
- FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE
- ;; Symbol
+  [board? any/c]
+  [make-board (->/c board?)]
+  ;; (-> Board)
 
- (rename-out [board make-board])
- ;; (-> Board)
+  [board-tiles (->/c board? (listof tile?))]
+  ;; (-> Board (Listof Tile))
 
- board-tiles
- ;; (-> Board (Listof Tile))
+  [what-kind-of-spot
+   (->i ((b board?) (t tile?))
+        #:pre/name (b t) "unoccupied spot" (free-spot? b t)
+        (result (or/c FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE)))]
+  ;; (-> Board Tile SpotType
+  ;; (define-type SpotType (U FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE))
+  ;; Precondition:
+  ;;   (free-spot? b t)
+  ;; Postcondition:
+  ;;   (U FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE)
 
- (rename-out [ext:what-kind-of-spot what-kind-of-spot])
- ;; (-> Board Tile SpotType
- ;; (define-type SpotType (U FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE))
- ;; Precondition:
- ;;   (free-spot? b t)
- ;; Postcondition:
- ;;   (U FOUNDING GROWING MERGING SINGLETON IMPOSSIBLE)
+  [growing-which
+   (->i ((b board?) (t tile?)) #:pre (b t) (eq? (what-kind-of-spot b t) GROWING) (hotel hotel?))]
+  ;; (-> Board Tile Hotel)
+  ;; Precondition: (eq? (what-kind-of-spot b t) GROWING)
 
- (rename-out [ext:growing-which growing-which])
- ;; (-> Board Tile Hotel)
- ;; Precondition: (eq? (what-kind-of-spot b t) GROWING)
-
- (rename-out [ext:merging-which merging-which])
+  [merging-which
+   (->i ((b board?) (t tile?)) #:pre/name (b t) "merger spot" (eq? (what-kind-of-spot b t) MERGING)
+        (values (acquirer (non-empty-listof hotel?)) (acquired (listof hotel?))))])
  ;; (-> Board Tile (Values (Pairof Hotel (Listof Hotel)) (Listof Hotel)))
  ;; Precondition: (eq? (what-kind-of-spot b t) MERGING)
 
  deduplicate/hotel
 
- size-of-hotel
- ;; (-> Board Hotel Natural)
+ (contract-out
+  [size-of-hotel (->/c board? hotel? natural-number/c)]
+  ;; (-> Board Hotel Natural)
 
- free-spot?
- ;; (-> Board Tile Boolean)
+  [free-spot? (->/c board? tile? boolean?)]
+  ;; (-> Board Tile Boolean)
 
- (rename-out [ext:merge-hotels merge-hotels])
- ;; (-> Board Tile Hotel Board)
- ;; Precondition: (eq? (what-kind-of-spot b t) MERGING)
- ;; Precondition: (let-values ([(w _) (merging-which b t)]) (member h w))
+  [merge-hotels
+   (->i ((b board?) (t tile?) (h hotel?))
+        #:pre/name (b t) "tile designates a merger spot" (eq? (what-kind-of-spot b t) MERGING)
+        #:pre/name (b t h) "... a winner" (let-values ([(w _) (merging-which b t)]) (member h w))
+        (new-board board?))]
+  ;; (-> Board Tile Hotel Board)
+  ;; Precondition: (eq? (what-kind-of-spot b t) MERGING)
+  ;; Precondition: (let-values ([(w _) (merging-which b t)]) (member h w))
 
- (rename-out [ext:found-hotel found-hotel])
- ;; (-> Board Tile Hotel Board)
- ;; Precondition: (eq? (what-kind-of-spot b t) FOUNDING)
+  [found-hotel
+   (->i ((b board?) (t tile?) (h hotel?)) #:pre (b t) (eq? (what-kind-of-spot b t) FOUNDING) 
+        (new-board board?))]
+  ;; (-> Board Tile Hotel Board)
+  ;; Precondition: (eq? (what-kind-of-spot b t) FOUNDING)
 
- (rename-out [ext:grow-hotel grow-hotel])
- ;; (-> Board Tile Board)
- ;; Precondition: (eq? (what-kind-of-spot b t) GROWING)
+  [grow-hotel
+   (->i ((b board?) (t tile?)) #:pre (b t) (eq? (what-kind-of-spot b t) GROWING) 
+        (new-board board?))]
+  ;; (-> Board Tile Board)
+  ;; Precondition: (eq? (what-kind-of-spot b t) GROWING)
 
- (rename-out [ext:place-tile place-tile])
- ;; (-> Board Tile Board)
- ;; Precondition: (memq (what-kind-of-spot b t) (list SINGLETON GROWING FOUNDING))
+  [place-tile
+   (->i ((b board?) (t tile?))
+        #:pre (b t) (memq (what-kind-of-spot b t) (list SINGLETON GROWING FOUNDING))
+        (new-board board?))]
+  ;; (-> Board Tile Board)
+  ;; Precondition: (memq (what-kind-of-spot b t) (list SINGLETON GROWING FOUNDING))
 
- (rename-out [ext:set-board set-board])
- ;; (-> Board Tile (U FOUNDING GROWING MERGING SINGLETON) (Option Hotel) Board)
- ;; Precondition: (free-spot? b t)
- ;; Precondition: (==> h (or (eq? FOUNDING a) (eq? MERGING a)))
- ;; Precondition: (==> (eq? MERGING a) h)
+  [set-board
+   (->i ((b board?) (t tile?) (a [or/c FOUNDING GROWING MERGING SINGLETON]) (h (or/c #f hotel?)))
+        #:pre/name (b t) "good spot" (free-spot? b t)
+        #:pre/name (a h) "hotel => founding & merging" (==> h (or (eq? FOUNDING a) (eq? MERGING a)))
+        #:pre/name (a h) "merging => hotel" (==> (eq? MERGING a) h)
+        (new-board board?))]
+  ;; (-> Board Tile (U FOUNDING GROWING MERGING SINGLETON) (Option Hotel) Board)
+  ;; Precondition: (free-spot? b t)
+  ;; Precondition: (==> h (or (eq? FOUNDING a) (eq? MERGING a)))
+  ;; Precondition: (==> (eq? MERGING a) h)
 
- (rename-out [ext:affordable? affordable?])
- ;; (-> Board Shares-Order Cash Boolean)
+  [affordable? (->/c board? shares-order? cash? boolean?)]
+  ;; (-> Board Shares-Order Cash Boolean)
 
- (rename-out [ext:*create-board-with-hotels *create-board-with-hotels])
- ;; (-> (Listof Tile) (Listof (Pairof Hotel (Listof Tile))) Board)
- ;; Precondition: (distinct t*)
- ;; Precondition: ((distinct-and-properly-formed t) ht*)
+  [*create-board-with-hotels
+   (->i ([t (and/c (listof tile?) distinct)]
+         [lh (t) (and/c (listof (cons/c hotel? (listof tile?))) (distinct-and-properly-formed t))])
+        [b board?])]
+  ;; (-> (Listof Tile) (Listof (Pairof Hotel (Listof Tile))) Board)
+  ;; Precondition: (distinct t*)
+  ;; Precondition: ((distinct-and-properly-formed t) ht*)
 
- distinct-and-properly-formed
- ;; (-> (Listof Tile) (-> (Listof (Pairof Hotel (Listof Tile))) Boolean))
+  [distinct-and-properly-formed
+   (->i ((free-tiles (listof tile?)))
+        (check-hotels
+         (->i ((hotels-as-lists (listof (cons/c hotel? (listof tile?))))) (ok boolean?))))]
+  ;; (-> (Listof Tile) (-> (Listof (Pairof Hotel (Listof Tile))) Boolean))
+  )
  )
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -101,12 +135,15 @@
 
 (require
  "../base/untyped.rkt"
+ "auxiliaries.rkt"
+ (rename-in racket/contract [-> ->/c])
 )
 (require (only-in "basics.rkt"
  hotel?
  SAFE#
  price-per-share
  shares-order?
+ cash?
 ))
 (require (only-in "auxiliaries.rkt"
   aux:partition
@@ -313,13 +350,6 @@
             ((t  (in-list t*)))
     (place-tile b t)))
 
-(define (ext:*create-board-with-hotels lt lh)
-  (unless (distinct lt)
-    (error 'create-board-with-hotels "precondition"))
-  (unless ((distinct-and-properly-formed lt) lh)
-    (error 'create-board-with-hotels "precondition"))
-  (*create-board-with-hotels lt lh))
-
 (define (*create-board-with-hotels lt lh)
   (for/fold
             ((b  (apply board* lt)))
@@ -371,11 +401,6 @@
   (eq? (board-ref board (tile-column tile) (tile-row tile))
        UNTAKEN))
 
-(define (ext:what-kind-of-spot board tile)
-  (unless (free-spot? board tile)
-    (error 'what-kind-of-spot (format "Precondition: (free-spot ~a ~a)" board tile)))
-  (what-kind-of-spot board tile))
-
 (define (what-kind-of-spot board tile)
   (define column (tile-column tile))
   (define row (tile-row tile))
@@ -401,22 +426,12 @@
      (if (or neighbor-taken-no-hotel? any-hotel-safe?) IMPOSSIBLE MERGING)]
     [else (error 'nope)]))
 
-(define (ext:growing-which board tile)
-  (unless (eq? (what-kind-of-spot board tile) GROWING)
-    (error 'growing-which (format "Precondition: expected growing, got ~a" (what-kind-of-spot board tile))))
-  (growing-which board tile))
-
 (define (growing-which board tile)
   ;; the 'first' is guranateed by contract
   (define n* (neighbors board (tile-column tile) (tile-row tile) list))
   (for/or
           ([c (in-list n*)])
     (and (hotel? c) (assert c string?))))
-
-(define (ext:merging-which board tile)
-  (unless (eq? (what-kind-of-spot board tile) MERGING)
-    (error 'merging-which (format "Precondition: expected merging, got ~a" (what-kind-of-spot board tile))))
-  (merging-which board tile))
 
 (define (merging-which board tile)
   (define surroundings (neighbors board (tile-column tile) (tile-row tile) list))
@@ -451,24 +466,12 @@
             ([(key value) (in-hash board)])
     (if (equal? hotel value) (+ size 1) size)))
 
-(define (ext:grow-hotel board tile)
-  (unless (eq? (what-kind-of-spot board tile) GROWING)
-    (error 'grow-hotel (format "Precondition: expected founding, got ~a" (what-kind-of-spot board tile))))
-  (grow-hotel board tile))
-
 (define (grow-hotel board tile)
   (define row (tile-row tile))
   (define column (tile-column tile))
   (define surroundings (neighbors board column row list))
   (define hotel-that-touches (first (filter hotel? surroundings)))
   (board-set board column row hotel-that-touches))
-
-(define (ext:merge-hotels board tile hotel)
-  (unless (eq? (what-kind-of-spot board tile) MERGING)
-    (error 'merge-hotels (format "Precondition: expected merging, got ~a" (eq? (what-kind-of-spot board tile) MERGING))))
-  (unless (let-values ([(w _) (merging-which board tile)]) (member hotel w))
-    (error 'merge-hotels (format "Precondition: hotel ~a is not on a merging spot" hotel)))
-  (merge-hotels board tile hotel))
 
 (define (merge-hotels board tile hotel)
   (define row (tile-row tile))
@@ -482,11 +485,6 @@
           (values key hotel)
           (values key current-content))))
   (board-set relabeled-hotel column row hotel))
-
-(define (ext:found-hotel board tile hotel)
-  (unless (eq? (what-kind-of-spot board tile) FOUNDING)
-    (error 'found-hotel (format "Precondition: expected founding, got ~a" (what-kind-of-spot board tile))))
-  (found-hotel board tile hotel))
 
 (define (found-hotel board tile hotel)
   (define row (tile-row tile))
@@ -519,24 +517,10 @@
                      (rest to-visit))
              (cons (first to-visit) visited))])))
 
-(define (ext:place-tile board tile)
-  (unless (memq (what-kind-of-spot board tile) (list SINGLETON GROWING FOUNDING))
-    (error 'place-tile "precondition"))
-  (place-tile board tile))
-
 (define (place-tile board tile)
   (define row (tile-row tile))
   (define column (tile-column tile))
   (board-set board column row))
-
-(define (ext:set-board board tile kind hotel)
-  (unless (free-spot? board tile)
-    (error 'set-board "Precondition"))
-  (unless (if hotel (or (eq? FOUNDING kind) (eq? MERGING kind)) #t)
-    (error 'set-board "Precondition"))
-  (unless (if (eq? MERGING kind) hotel #t)
-    (error 'set-board "Precondition"))
-  (set-board board tile kind hotel))
 
 (define (set-board board tile kind hotel)
   (cond
@@ -545,11 +529,6 @@
     [(and hotel (eq? SINGLETON kind)) (place-tile board tile)]
     [(and hotel (eq? GROWING kind)) (grow-hotel board tile)]
     [else (error 'nopers)]))
-
-(define (ext:affordable? board hotels budget)
-  (unless (shares-order? hotels)
-    (error 'afoordable "precondigin"))
-  (affordable? board hotels budget))
 
 (define (affordable? board hotels budget)
   (define prices
@@ -656,3 +635,4 @@
           (in r (or (column-> c) (error 'badc)))
           (in r (or (column-< c) (error 'badc)))))
 
+(define make-board board)

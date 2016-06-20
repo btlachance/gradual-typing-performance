@@ -4,18 +4,21 @@
 ;; (i.e. dates and times at the same time)
 
 (require
-  benchmark-util
+  ;benchmark-util
   "core-adapter.rkt"
   "gregor-adapter.rkt"
   racket/match
-  (only-in racket/math exact-round exact-floor))
-
-(require/typed/check
+  (only-in racket/math exact-round exact-floor)
+  "date.rkt"
+  "ymd.rkt"
+  "hmsn.rkt"
+  "time.rkt")
+#;(require/typed/check
   "hmsn.rkt"
     [NS/DAY Natural]
     [NS/SECOND Natural]
 )
-(require/typed/check
+#;(require/typed/check
   "date.rkt"
     [date->iso8601 (-> Date String)]
     [date->jdn (-> Date Integer)]
@@ -24,7 +27,7 @@
     [date (->* (Natural) (Month Natural) Date)]
     [date=? (-> Date Date Boolean)]
 )
-(require/typed/check "time.rkt"
+#;(require/typed/check "time.rkt"
     [time->iso8601 (-> Time String)]
     [time->ns (-> Time Natural)]
     [day-ns->time (-> Natural Time)]
@@ -32,31 +35,33 @@
     [time=? (-> Time Time Boolean)]
 )
 
+
 ;; -----------------------------------------------------------------------------
 
 (provide;/contract
- datetime                 ;(->i ([year exact-integer?])
-                          ;      ([month (integer-in 1 12)]
-                          ;       [day (year month) (day-of-month/c year month)]
-                          ;       [hour (integer-in 0 23)]
-                          ;       [minute (integer-in 0 59)]
-                          ;       [second (integer-in 0 59)]
-                          ;       [nanosecond (integer-in 0 (sub1 NS/SECOND))])
-                          ;      [dt datetime?])]
- datetime->date           ;(-> datetime? date?)]
- datetime->time           ;(-> datetime? time?)]
- datetime->jd             ;(-> datetime? rational?)]
- datetime->posix          ;(-> datetime? rational?)]
- date+time->datetime      ;(-> date? time? datetime?)]
- jd->datetime             ;(-> real? datetime?)]
- posix->datetime          ;(-> real? datetime?)]
- datetime->iso8601        ;(-> datetime? string?)]
- datetime-add-nanoseconds ;(-> datetime? exact-integer? datetime?)]
- datetime-add-seconds     ;(-> datetime? exact-integer? datetime?)]
- datetime=?               ;(-> datetime? datetime? boolean?)]
- datetime<?              ;(-> datetime? datetime? boolean?)]
- datetime<=?              ;(-> datetime? datetime? boolean?)]
-)
+ (contract-out
+  [datetime?                (->/c any/c boolean?)]
+  [datetime                 (->i ([year natural-number/c])
+                                 ([month month?]
+                                  [day (year month) (day-of-month/c year month)]
+                                  [hour (integer-in 0 23)]
+                                  [minute (integer-in 0 59)]
+                                  [second (integer-in 0 59)]
+                                  [nanosecond (integer-in 0 (sub1 NS/SECOND))])
+                                 [dt datetime?])]
+  [datetime->date           (->/c datetime? date?)]
+  [datetime->time           (->/c datetime? time?)]
+  [datetime->jd             (->/c datetime? rational?)]
+  [datetime->posix          (->/c datetime? rational?)]
+  [date+time->datetime      (->/c date? time? datetime?)]
+  [jd->datetime             (->/c (and/c real? exact?) datetime?)]
+  [posix->datetime          (->/c (and/c real? exact?) datetime?)]
+  [datetime->iso8601        (->/c datetime? string?)]
+  [datetime-add-nanoseconds (->/c datetime? exact-integer? datetime?)]
+  [datetime-add-seconds     (->/c datetime? exact-integer? datetime?)]
+  [datetime=?               (->/c datetime? datetime? boolean?)]
+  [datetime<?               (->/c datetime? datetime? boolean?)]
+  [datetime<=?              (->/c datetime? datetime? boolean?)]))
 
 ;; =============================================================================
 
@@ -73,7 +78,7 @@
 (define (datetime-write-proc dt out mode)
   (fprintf out "#<datetime ~a>" (datetime->iso8601 dt)))
 
-(: datetime? (-> Any Boolean))
+(: datetime? (-> Any Boolean : DateTime))
 (define datetime? DateTime?)
 
 (: datetime->date (-> DateTime Date))

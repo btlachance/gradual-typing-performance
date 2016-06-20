@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data.rkt")
 (require benchmark-util)
 (require/typed/check "block.rkt"
   [block-rotate-ccw (-> Posn Block Block)]
@@ -105,20 +105,22 @@
               [n : Real])
            (max (block-x b) n)) 0 bs))
 
+
 (provide
- blocks-contains?
- blocks=?
- blocks-subset?
- blocks-intersect
- blocks-count
- blocks-overflow?
- blocks-move
- blocks-rotate-cw
- blocks-rotate-ccw
- blocks-change-color
- blocks-row
- full-row?
- blocks-union
- blocks-max-x
- blocks-min-x
- blocks-max-y)
+ (contract-out
+  [blocks-contains? (BSET/C BLOCK/C . ->/c . boolean?)]
+  [blocks=? (BSET/C BSET/C . ->/c . boolean?)]
+  [blocks-subset? (BSET/C BSET/C . ->/c . boolean?)]
+  [blocks-intersect (BSET/C BSET/C . ->/c . BSET/C)]
+  [blocks-count (BSET/C . ->/c . real?)]
+  [blocks-overflow? (BSET/C . ->/c . boolean?)]
+  [blocks-move (integer? integer? BSET/C . ->/c . BSET/C)]
+  [blocks-rotate-cw (POSN/C BSET/C . ->/c . BSET/C)]
+  [blocks-rotate-ccw (POSN/C BSET/C . ->/c . BSET/C)]
+  [blocks-change-color (BSET/C COLOR/C . ->/c . BSET/C)]
+  [blocks-row (BSET/C real? . ->/c . BSET/C)]
+  [full-row? (BSET/C natural-number/c . ->/c . boolean?)]
+  [blocks-union (BSET/C BSET/C . ->/c . BSET/C)]
+  [blocks-max-x (BSET/C . ->/c . real?)]
+  [blocks-min-x (BSET/C . ->/c . real?)]
+  [blocks-max-y (BSET/C . ->/c . real?)]))

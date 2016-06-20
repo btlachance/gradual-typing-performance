@@ -19,5 +19,6 @@
       (snake-self-collide? (world-snake w))))
 
 (provide
- handle-key 
- game-over?)
+ (contract-out
+  [handle-key (WORLD/C string? . -> . WORLD/C)]
+  [game-over? (WORLD/C . -> . boolean?)]))

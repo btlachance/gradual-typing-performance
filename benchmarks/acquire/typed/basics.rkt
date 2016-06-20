@@ -5,86 +5,89 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (provide
- hotel?
- ;; (-> Any Boolean)
- hotel<=?
- ;; (-> Hotel Hotel Boolean)
+ (contract-out
+  [hotel? (->/c any/c boolean?)]
+  ;; (-> Any Boolean)
+  [hotel<=? (->/c hotel? hotel? boolean?)]
+  ;; (-> Hotel Hotel Boolean)
  
- ALL-HOTELS
- ;; (Listof Hotel), also sorted
+  [ALL-HOTELS (and/c (listof hotel?) (sorted hotel<=?))]
+  ;; (Listof Hotel), also sorted
  
- SAFE# FINAL#
- ;; Natural
+  [SAFE# natural-number/c]
+  [FINAL# natural-number/c]
+  ;; Natural
 
- hotel->label
- ;; (-> Hotel String)
+  [hotel->label (->/c hotel? string?)]
+  ;; (-> Hotel String)
 
- hotel->color
- ;; (-> Hotel Symbol)
+  [hotel->color (->/c hotel? symbol?)]
+   ;; (-> Hotel Symbol)
 
- shares?
- ;; (-> Any Boolean)
+  [shares? any/c]
+  ;; (-> Any Boolean)
 
- banker-shares0
- ;; Shares
+  [banker-shares0 shares?]
+  ;; Shares
 
- player-shares0
- ;; Shares
+  [player-shares0 shares?]
+  ;; Shares
 
- shares-order?
- ;; 
+  [shares-order? (->/c (listof hotel?) boolean?)]
+  ;;
 
- SHARES-PER-TURN#
- ;; Natural
+  [SHARES-PER-TURN# natural-number/c]
+  ;; Natural
 
- shares++
- ;; (-> Shares Hotel Shares)
+  [shares++ (->/c shares? hotel? shares?)]
+  ;; (-> Shares Hotel Shares)
 
- (rename-out [ext:shares-- shares--])
- ;; (-> Shares Hotel Shares)
- ;; Precondition: (shares-available s h) > 0
+  [shares-- (->i ((s shares?) (h hotel?)) #:pre (s h) (> (shares-available s h) 0) (r shares?))]
+  ;; (-> Shares Hotel Shares)
+  ;; Precondition: (shares-available s h) > 0
 
- shares-available
- ;; (-> Shares Hotel Natural)
+  [shares-available (->/c shares? hotel? natural-number/c)]
+   ;; (-> Shares Hotel Natural)
 
- (rename-out [ext:shares-available? shares-available?])
- ;; (-> Shares (Listof Hotel) Boolean)
- ;; Precondition: (shares-order? s*)
- ;; "Can the given order of shares be satisfied in this wallet?
+  [shares-available? (->/c shares? shares-order? boolean?)]
+  ;; (-> Shares (Listof Hotel) Boolean)
+  ;; Precondition: (shares-order? s*)
+  ;; "Can the given order of shares be satisfied in this wallet?
 
- shares-minus
- ;; (-> Shares Shares Shares)
+  [shares-minus (->/c shares? shares? shares?)]
+  ;; (-> Shares Shares Shares)
 
- shares-plus
- ;; (-> Shares Shares Shares)
+  [shares-plus (->/c shares? shares? shares?)]
+  ;; (-> Shares Shares Shares)
 
- shares-compatible
- ;; (-> Shares (-> Shares Boolean))
+  [shares-compatible (->/c shares? (->/c shares? boolean?))]
+  ;; (-> Shares (-> Shares Boolean))
 
- shares-combinable?
- ;; (-> (Listof Shares) Boolean)
+  [shares-combinable? (->/c (listof shares?) boolean?)]
+  ;; (-> (Listof Shares) Boolean)
 
- (rename-out [ext:*combine-shares *combine-shares])
- ;; (-> (Listof Shares) Shares)
- ;; Precondition: shares-combinable
+  [*combine-shares (->/c (and/c (listof shares?) shares-combinable?) shares?)]
+  ;; (-> (Listof Shares) Shares)
+  ;; Precondition: shares-combinable
 
- *create-shares
- ;; (-> Hotel Natural Shares)
+  [*create-shares (->/c hotel? natural-number/c shares?)]
+  ;; (-> Hotel Natural Shares)
 
- shares->string
- ;; (-> Shares String)
+  [shares->string (->/c shares? string?)]
+  ;; (-> Shares String)
 
- cash?
- ;; (-> Any Boolean)
+  [cash? (->/c any/c boolean?)]
+  ;; (-> Any Boolean)
 
- CASH0
- ;; Cash
+  [CASH0 cash?]
+  ;; Cash
 
- price-per-share
- ;; (-> Hotel Natural (Option Cash))
+  [price-per-share (->/c hotel? natural-number/c (or/c #f cash?))]
+  ;; (-> Hotel Natural (Option Cash))
 
- bonus
- ;; (-> M*rity Hotel Natural Cash)
+  [bonus (->/c (or/c 'majority 'minority) hotel? natural-number/c cash?)]
+  ;; (-> M*rity Hotel Natural Cash)
+  )
 )
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -133,9 +136,10 @@
 
 ;; Hotel  :: HOTELS 
 
-(: hotel? (-> Any Boolean))
+(: hotel? (-> Any Boolean : #:+ Hotel))
 (define (hotel? x)
-  (cons? (member x HOTELS)))
+  (and (string? x)
+       (cons? (member x HOTELS))))
 
 (: hotel<=? (-> Hotel Hotel Boolean))
 (define hotel<=? string<=?)
@@ -174,9 +178,8 @@
 (define SHARES-PER-TURN# 2)
 
 ;;bg; changed from shares-order/c
-(: shares-order? (-> Any Boolean))
-(define (shares-order? x*)
-  (define h* (cast x* (Listof Hotel)))
+(: shares-order? (-> (Listof Hotel) Boolean))
+(define (shares-order? h*)
   (and
    (not (null? h*))
    (let ([h1 : Hotel (car h*)])
@@ -196,12 +199,12 @@
                        ([h (in-list ALL-HOTELS)])
                (cons h SHARES0))))
 
-(: shares? (-> Any Boolean))
+(: shares? (-> Shares Boolean))
 (define (shares? x)
   (and (hash? x)
        (for/and ([(k v) (in-hash x)])
          (and (hotel? k)
-              (exact-nonnegative-integer? k)))))
+              (exact-nonnegative-integer? v)))))
 
 (: shares-minus (-> Shares Shares Shares))
 (define (shares-minus s t)
@@ -217,12 +220,6 @@
             ([(hotel n) (in-hash t)])
     (hash-update s hotel (λ ([m : Share]) (+ m n)))))
 
-(: ext:shares-- (-> Shares Hotel Shares))
-(define (ext:shares-- s h)
-  (unless (> (shares-available s h) 0)
-    (error 'shares-- (format "Precondition failed: (> (shares-available ~a ~a) 0)" s h)))
-  (shares-- s h))
-
 (: shares-- (-> Shares Hotel Shares))
 (define (shares-- s h)
   (hash-update s h sub1))
@@ -231,21 +228,9 @@
 (define (shares++ s h)
   (hash-update s h add1))
 
-(: ext:shares-available (-> Shares Hotel Share))
-(define (ext:shares-available s h)
-  (unless (shares-order? h)
-    (error 'shares-available (format "Precondition: shares-order ~a\n" h)))
-  (shares-available s h))
-
 (: shares-available (-> Shares Hotel Share))
 (define (shares-available s h)
   (hash-ref s h))
-
-(: ext:shares-available? (-> Shares (Listof Hotel) Boolean))
-(define (ext:shares-available? available-s hotels)
-  (unless (shares-order? available-s)
-    (error 'shares-available "Precondition"))
-  (shares-available? available-s hotels))
 
 (: shares-available? (-> Shares (Listof Hotel) Boolean))
 (define (shares-available? available-s hotels)
@@ -303,12 +288,6 @@
 (: *combine-shares (-> (Listof Shares) Shares))
 (define (*combine-shares s)
   (foldr shares-plus player-shares0 s))
-
-(: ext:*combine-shares (-> (Listof Shares) Shares))
-(define (ext:*combine-shares s)
-  (unless (shares-combinable? s)
-    (error '*combine-shares (format "Precondition error: shares-combinable ~a" s)))
-  (*combine-shares s))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; CASH

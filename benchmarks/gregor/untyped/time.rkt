@@ -1,21 +1,23 @@
 #lang racket/base
 
 ;; Working with Time objects
-
-(provide;/contract
- make-time            ;(->i ([hour (integer-in 0 23)])
-                 ;      ([minute (integer-in 0 59)]
-                 ;       [second (integer-in 0 59)]
-                 ;       [nanosecond (integer-in 0 (sub1 NS/SECOND))])
-                 ;      [t time?])]
- time->hmsn     ; (-> time? HMSN?)]
- time->ns       ; (-> time? (integer-in 0 (sub1 NS/DAY)))]
- day-ns->time   ; (-> (integer-in 0 (sub1 NS/DAY)) time?)]
- time->iso8601  ; (-> time? string?)]
- time=?         ; (-> time? time? boolean?)]
- time<?         ; (-> time? time? boolean?)]
- time<=?        ; (-> time? time? boolean?)]
-)
+(require racket/contract/base)
+(provide
+ (contract-out
+  [make-time            (->i ([hour (integer-in 0 23)])
+                             ([minute (integer-in 0 59)]
+                              [second (integer-in 0 59)]
+                              [nanosecond (integer-in 0 (sub1 NS/SECOND))])
+                             [t time?])]
+  [time->hmsn     (-> time? HMSN?)]
+  [time->ns       (-> time? (integer-in 0 (sub1 NS/DAY)))]
+  [day-ns->time   (-> (integer-in 0 (sub1 NS/DAY)) time?)]
+  [time->iso8601  (-> time? string?)]
+  [time=?         (-> time? time? boolean?)]
+  [time<?         (-> time? time? boolean?)]
+  [time<=?        (-> time? time? boolean?)]
+  ))
+(define time? Time?)
 
 ;; -----------------------------------------------------------------------------
 
@@ -24,13 +26,8 @@
   (only-in racket/format ~r)
   "core-structs.rkt"
   "gregor-structs.rkt"
-  racket/match)
-(require (only-in
   "hmsn.rkt"
-    hmsn->day-ns ;(-> HMSN Natural)]
-    day-ns->hmsn ;(-> Natural HMSN)]
-    NS/SECOND ;Natural]
-))
+  racket/match)
 
 ;; =============================================================================
 
@@ -50,7 +47,6 @@
 (define time->hmsn Time-hmsn)
 ;(: time->ns (-> Any Natural))
 (define (time->ns t)
-  (unless (Time? t) (error "time->ns: type error"))
   (Time-ns t))
 
 ;(: hmsn->time (-> HMSN Time))

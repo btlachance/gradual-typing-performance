@@ -3,21 +3,22 @@
 ;; Core:
 ;; Year-Month-Day
 ;; Basic conversions
-
-(provide;/contract
- ymd->jdn         ; (-> YMD? exact-integer?)]
- jdn->ymd         ; (-> exact-integer? YMD?)]
- jdn->wday        ; (-> exact-integer? (integer-in 0 6))]
- jdn->iso-wday    ; (-> exact-integer? (integer-in 1 7))]
- ymd->yday        ; (-> YMD? (integer-in 1 366))]
- ymd->quarter     ; (-> YMD? (integer-in 1 4))]
- ymd-add-years    ; (-> YMD? exact-integer? YMD?)]
- ymd-add-months   ; (-> YMD? exact-integer? YMD?)]
- leap-year?       ; (-> exact-integer? boolean?)]
- days-in-month    ; (-> exact-integer? (integer-in 1 12) (integer-in 28 31))]
- iso-weeks-in-year; (-> exact-integer? (or/c 52 53))]
- ;; day-of-month/c   ; any/c
-)
+(require racket/contract/base)
+(provide
+ (contract-out
+  [ymd->jdn          (-> YMD? exact-integer?)]
+  [jdn->ymd          (-> exact-integer? YMD?)]
+  [jdn->wday         (-> exact-integer? (integer-in 0 6))]
+  [jdn->iso-wday     (-> exact-integer? (integer-in 1 7))]
+  [ymd->yday         (-> YMD? (integer-in 1 366))]
+  [ymd->quarter      (-> YMD? (integer-in 1 4))]
+  [ymd-add-years     (-> YMD? natural-number/c YMD?)]
+  [ymd-add-months    (-> YMD? natural-number/c YMD?)]
+  [leap-year?        (-> natural-number/c boolean?)]
+  [days-in-month     (-> natural-number/c (integer-in 1 12) (integer-in 28 31))]
+  [iso-weeks-in-year (-> natural-number/c (or/c 52 53))]
+  [day-of-month/c    any/c]
+  ))
 
 ;; -----------------------------------------------------------------------------
 
@@ -209,8 +210,8 @@
       [(31) 31]
       [else (error "days in month")])))
 
-;; (define (day-of-month/c y m)
-;;   (integer-in 1 (days-in-month y m)))
+ (define (day-of-month/c y m)
+   (integer-in 1 (days-in-month y m)))
 
 ;(: iso-weeks-in-year (-> Natural (U 52 53)))
 (define (iso-weeks-in-year y)

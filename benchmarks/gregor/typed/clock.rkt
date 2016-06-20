@@ -3,29 +3,33 @@
 ;; Front-end:
 ;; Working with current clock
 
-(provide;/contract
- current-clock         ;any/c]
- current-posix-seconds ;any/c]
- now/moment            ;(->i () (#:tz [tz tz/c]) [res moment?])]
- now                   ;(->i () (#:tz [tz tz/c]) [res datetime?])]
- today                 ;(->i () (#:tz [tz tz/c]) [res date?])]
- current-time          ;(->i () (#:tz [tz tz/c]) [res time?])]
- now/moment/utc        ;(-> moment?)]
- now/utc               ;(-> datetime?)]
- today/utc             ;(-> date?)]
- current-time/utc      ;(-> time?)])
-)
+(provide
+ (contract-out
+ [current-clock         any/c]
+ [current-posix-seconds any/c]
+ [now/moment            (->i () (#:tz [tz tz/c]) [res moment?])]
+ [now                   (->i () (#:tz [tz tz/c]) [res datetime?])]
+ [today                 (->i () (#:tz [tz tz/c]) [res date?])]
+ [current-time          (->i () (#:tz [tz tz/c]) [res time?])]
+ [now/moment/utc        (->/c moment?)]
+ [now/utc               (->/c datetime?)]
+ [today/utc             (->/c date?)]
+ [current-time/utc      (->/c time?)]))
 
 ;; -----------------------------------------------------------------------------
 
 (require
-  benchmark-util
+  ;benchmark-util
   (only-in racket/math exact-round)
   "../base/types.rkt"
   "tzinfo-adapter.rkt"
   "gregor-adapter.rkt"
+  "moment.rkt"
+  "date.rkt"
+  "datetime.rkt"
+  "time.rkt"
 )
-(require/typed/check "moment.rkt"
+#;(require/typed "moment.rkt"
     [current-timezone (Parameterof (U tz #f))]
     [posix->moment (-> Exact-Rational tz Moment)]
     [moment->datetime/local (-> Moment DateTime)]
@@ -35,7 +39,7 @@
     [moment->iso8601 (-> Moment String)]
     [moment->iso8601/tzid (-> Moment String)]
 )
-(require/typed/check "datetime.rkt"
+#;(require/typed "datetime.rkt"
     [datetime->date (-> DateTime Date)]
     [datetime->time (-> DateTime Time)]
 )

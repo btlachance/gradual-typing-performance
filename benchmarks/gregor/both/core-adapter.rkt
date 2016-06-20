@@ -5,18 +5,12 @@
 (provide
   (struct-out YMD)
   (struct-out HMSN)
-  Month)
+  Month month?
+  nonneg?)
 
-(require
-  benchmark-util
-  "../base/types.rkt")
+(require "../base/types.rkt")
 
-(require/typed/check "core-structs.rkt"
-  [#:struct YMD ([y : Natural]
-                 [m : Month]
-                 [d : Natural])]
-  [#:struct HMSN ([h : Integer]
-                 [m : Integer]
-                 [s : Integer]
-                 [n : Integer])])
-
+(require "core-structs.rkt")
+(: nonneg? (FlatCon Real Nonnegative-Real))
+(define (nonneg? [x : Real])
+  (>= x 0))

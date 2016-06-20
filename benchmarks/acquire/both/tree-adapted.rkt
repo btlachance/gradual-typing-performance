@@ -13,8 +13,8 @@
 (require
   benchmark-util
   "../base/types.rkt"
-  "board-adapted.rkt"
-  "state-adapted.rkt"
+  "board.rkt"
+  "state.rkt"
   typed/racket/unsafe
 )
 

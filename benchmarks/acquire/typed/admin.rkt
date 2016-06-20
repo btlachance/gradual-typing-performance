@@ -15,8 +15,8 @@
 (require
  benchmark-util
  "../base/types.rkt"
- "board-adapted.rkt"
- "state-adapted.rkt"
+ "board.rkt"
+ "state.rkt"
  "tree-adapted.rkt"
  typed/racket/unsafe
 )
@@ -60,9 +60,6 @@
                            (lambda () (failure 'X)))))) ;`(X ,(exn-message x))))))))
                       ((inst call-with-limits A) sec-limit mb-limit producer))])
              (lambda () (consumer a))))))
-
-
-;; -----------------------------------------------------------------------------
 
 (: log (-> Any Any Void))
 (define (log status msg)

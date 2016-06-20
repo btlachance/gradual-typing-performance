@@ -1,5 +1,5 @@
 #lang typed/racket
-(require "data-adaptor.rkt")
+(require "data.rkt")
 
 (define GRID-SIZE 30)
 
@@ -15,10 +15,13 @@
 (define (FOOD-RADIUS) (SEGMENT-RADIUS))
 (define (WORLD) (world (snake "right" (cons (posn 5 3) empty))
                        (posn 8 12)))
-
 (provide
- WORLD
- GRID-SIZE
- BOARD-HEIGHT-PIXELS
- BOARD-WIDTH
- BOARD-HEIGHT)
+ (contract-out
+  [WORLD (->/c WORLD/C)]
+  ;; [BACKGROUND (->/c image/c)]
+  ;; [FOOD-IMAGE (->/c image/c)]
+  ;; [SEGMENT-IMAGE (->/c image/c)]
+  [GRID-SIZE real?]
+  [BOARD-HEIGHT-PIXELS (->/c real?)]
+  [BOARD-WIDTH real?]
+  [BOARD-HEIGHT real?]))

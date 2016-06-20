@@ -8,6 +8,7 @@
   racket/match
   "core-structs.rkt"
   "gregor-structs.rkt"
+  "ymd.rkt"
   (only-in racket/math exact-round exact-floor))
 
 (require (only-in
@@ -34,29 +35,33 @@
 
 ;; -----------------------------------------------------------------------------
 
-(provide;/contract
- datetime                 ;(->i ([year exact-integer?])
-                          ;      ([month (integer-in 1 12)]
-                          ;       [day (year month) (day-of-month/c year month)]
-                          ;       [hour (integer-in 0 23)]
-                          ;       [minute (integer-in 0 59)]
-                          ;       [second (integer-in 0 59)]
-                          ;       [nanosecond (integer-in 0 (sub1 NS/SECOND))])
-                          ;      [dt datetime?])]
- datetime->date           ;(-> datetime? date?)]
- datetime->time           ;(-> datetime? time?)]
- datetime->jd             ;(-> datetime? rational?)]
- datetime->posix          ;(-> datetime? rational?)]
- date+time->datetime      ;(-> date? time? datetime?)]
- jd->datetime             ;(-> real? datetime?)]
- posix->datetime          ;(-> real? datetime?)]
- datetime->iso8601        ;(-> datetime? string?)]
- datetime-add-nanoseconds ;(-> datetime? exact-integer? datetime?)]
- datetime-add-seconds     ;(-> datetime? exact-integer? datetime?)]
- datetime=?               ;(-> datetime? datetime? boolean?)]
- datetime<?               ;(-> datetime? datetime? boolean?)]
- datetime<=?              ;(-> datetime? datetime? boolean?)]
-)
+(require racket/contract/base)
+(provide
+ (contract-out
+  [datetime?                (-> any/c boolean?)]
+  [datetime                 (->i ([year natural-number/c])
+                                 ([month (integer-in 1 12)]
+                                  [day (year month) (day-of-month/c year month)]
+                                  [hour (integer-in 0 23)]
+                                  [minute (integer-in 0 59)]
+                                  [second (integer-in 0 59)]
+                                  [nanosecond (integer-in 0 (sub1 NS/SECOND))])
+                                 [dt datetime?])]
+ [datetime->date           (-> datetime? date?)]
+ [datetime->time           (-> datetime? Time?)]
+ [datetime->jd             (-> datetime? rational?)]
+ [datetime->posix          (-> datetime? rational?)]
+ [date+time->datetime      (-> date? Time? datetime?)]
+ [jd->datetime             (-> real? datetime?)]
+ [posix->datetime          (-> real? datetime?)]
+ [datetime->iso8601        (-> datetime? string?)]
+ [datetime-add-nanoseconds (-> datetime? exact-integer? datetime?)]
+ [datetime-add-seconds     (-> datetime? exact-integer? datetime?)]
+ [datetime=?               (-> datetime? datetime? boolean?)]
+ [datetime<?               (-> datetime? datetime? boolean?)]
+ [datetime<=?              (-> datetime? datetime? boolean?)]
+ ))
+(define date? Date?)
 
 ;; =============================================================================
 

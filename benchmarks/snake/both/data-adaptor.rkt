@@ -10,12 +10,6 @@
   [#:struct world ([snake : Snake]
                    [food  : Posn])])
 
-(define-type (NEListof A) (Pairof A (Listof A)))
-(define-type Dir (U "up" "down" "left" "right"))
-(define-type Snake snake)
-(define-type World world)
-(define-type Posn  posn)
-
 (provide
  (struct-out posn)
  (struct-out snake)
@@ -24,4 +18,9 @@
  Snake
  World
  Posn
- NEListof)
+ NEListof
+ posn=?
+ DIR/C
+ POSN/C
+ SNAKE/C
+ WORLD/C)

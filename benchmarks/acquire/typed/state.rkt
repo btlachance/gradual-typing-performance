@@ -9,7 +9,13 @@
 (provide
  score?
 
- (struct-out player)
+ (contract-out
+  [player? (->/c any/c boolean?)]
+  [player-money (->/c player? cash?)]
+  [player-tiles (->/c player? (listof tile?))]
+  [player-shares (->/c player? shares?)]
+  [player-external (->/c player? any/c)]
+  [player-name (->/c player? string?)])
  ; player?
  ; ;; (-> Any Boolean)
  ; player-money
@@ -26,32 +32,38 @@
  player0
  ;; (->* (String Tile Tile Tile Tile Tile Tile) (Any) Player)
 
- (rename-out [ext:*create-player *create-player])
+ (contract-out 
+  [*create-player
+   (->/c string? cash? shares? (and/c [listof tile?] distinct (λ ([x : (Listof Tile)]) (<= (length x) STARTER-TILES#))) 
+         player?)]
  ;; (-> String Cash Shares (Listof Tile) Player)
  ;; Precondition: distinct tiles
  ;; Precondition: (<= STARTER-TILES# (length tiles))
 
- (struct-out state)
- ;; state?
- ;; ;; (-> Any Boolean)
- ;; state-hotels
- ;; ;; (-> Any Boolean)
- ;; state-shares
- ;; ;; (-> State Shares)
- ;; state-tiles
- ;; ;; (-> State (Listof Tile))
- ;; state-board
- ;; ;; (-> State Board)
- ;; state-players
- ;; ;; (-> State (Listof Player))
+  [state? (->/c any/c boolean?)]
+  [state-hotels (->/c state? (listof hotel?))]
+  [state-shares (->/c state? shares?)]
+  [state-sub-shares (->/c state? shares? state?)]
+  [state-tiles (->/c state? (listof tile?))]
+  [state-board (->/c state? board?)]
+  [state-players (->/c state? (listof player?))]
+  [state-current-player (->/c state? player?)]
+  ;; state?
+  ;; ;; (-> Any Boolean)
+  ;; state-hotels
+  ;; ;; (-> Any Boolean)
+  ;; state-shares
+  ;; ;; (-> State Shares)
+  ;; state-tiles
+  ;; ;; (-> State (Listof Tile))
+  ;; state-board
+  ;; ;; (-> State Board)
+  ;; state-players
+  ;; ;; (-> State (Listof Player))
 
- state-sub-shares
- ;; (-> State Shares State)
-
- state-current-player
- ;; (-> State Player)
-
- (rename-out [ext:state0 state0])
+  [state0
+   (->i () () #:rest [rest (and/c (listof player?) (λ ([l : (Listof player)]) (distinct (apply append (map player-tiles l)))))]
+        [result state?])])
  ;; (->* () () #:rest (Listof Player) State)
  ;; Precondition: (λ (l) (distinct (apply append (map player-tiles l)))))
 
@@ -72,68 +84,107 @@
         ;;             (member h w))))
  ;; Informal-Postcondition: if spot is MERGING, the hotel should be "large"
 
- (rename-out [ext:state-buy-shares state-buy-shares])
- ;; (-> State Shares-Order State)
- ;; Precondition:
-        ;; (affordable? (state-board s) shares (player-money (state-current-player s)))
- ;; Precondition:
-        ;; (let ([banker-s-shares (state-shares s)])
-        ;;   (shares-available? banker-s-shares shares))
+ (contract-out
+  [state-buy-shares
+   (->i ((s state?) (shares shares-order?))
+        #:pre/name (s shares) "player has enough money" 
+        (affordable? (state-board s) shares (player-money (state-current-player s)))
+        #:pre/name (s shares) "shares are available"
+        (let ([banker-s-shares (state-shares s)])
+          (shares-available? banker-s-shares shares))
+        (next-state state?))]
+  ;; (-> State Shares-Order State)
+  ;; Precondition:
+  ;; (affordable? (state-board s) shares (player-money (state-current-player s)))
+  ;; Precondition:
+  ;; (let ([banker-s-shares (state-shares s)])
+  ;;   (shares-available? banker-s-shares shares))
 
- (rename-out [ext:state-return-shares state-return-shares])
- ;; (->* [State (Listof (List Player (Listof (List Hotel Boolean))))] [Board] State)
- ;; TODO if optional board is specified, use the hotel sizes from there
- ;; Precondition:
-        ;; (= (length (state-players s)) (length d))
-  
- (rename-out [ext:state-move-tile state-move-tile])
- ;; (-> State Tile State)
- ;; Precondition:
-        ;; (member t (state-tiles s))
+  [state-return-shares
+   (->i ((s state?) (d (listof (list/c player? (listof (list/c hotel? boolean?))))))
+        ;; if optional board is specified, use the hotel sizes from there
+        ((b board?))
+        #:pre (s d) (= (length (state-players s)) (length d))
+        (next state?))]
+  ;; (->* [State (Listof (List Player (Listof (List Hotel Boolean))))] [Board] State)
+  ;; TODO if optional board is specified, use the hotel sizes from there
+  ;; Precondition:
+  ;; (= (length (state-players s)) (length d))
 
- state-next-turn
- ;; (-> State State)
+  [state-move-tile
+   (->i ((s state?) (t tile?))
+        #:pre/name (s t) "banker's tile?" (member t (state-tiles s))
+        (next-state state?))]
+  ;; (-> State Tile State)
+  ;; Precondition:
+  ;; (member t (state-tiles s))
 
- state-remove-current-player
- ;; (-> State State)
+  [state-next-turn (->/c state? state?)]
+  ;; (-> State State)
 
- state-eliminate
- ;; (-> State (Listof Player) State)
+  [state-remove-current-player (->/c state? state?)]
+  ;; (-> State State)
 
- state-score
- ;; (-> State Score)
+  [state-eliminate (->/c state? (listof player?) state?)]
+  ;; (-> State (Listof Player) State)
 
- state-final?
- ;; (-> State Boolean)
- 
- (rename-out [ext:*create-state *create-state])
- ;; (-> Board (Listof Player) State)
- ;; Precondition: (combinable? lp)
- ;; Precondition: (distinct (apply append (board-tiles b) (map player-tiles lp)))
+  [state-score (->/c state? score/c)]
+  ;; (-> State Score)
 
- (rename-out [ext:*cs0 *cs0])
+  [state-final? (->/c state? boolean?)]
+  ;; (-> State Boolean)
+
+  [*create-state
+   (->i ((b board?)
+         (lp
+          (let ()
+            (: combinable? ((Listof Player) -> Boolean))
+            (define (combinable? lp)
+              (define d (shares-combinable? (map player-shares lp)))
+              (unless d
+                (displayln `(shares not combinable ,(map player-shares lp))))
+              d)
+            (and/c (listof player?) combinable?))))
+        #:pre/name (b lp) "players' tiles and tiles on board are mutually distinct"
+        (distinct (apply append (board-tiles b) (map player-tiles lp)))
+        (result state?))]
+  ;; (-> Board (Listof Player) State)
+  ;; Precondition: (combinable? lp)
+  ;; Precondition: (distinct (apply append (board-tiles b) (map player-tiles lp)))
+
+  [*cs0 (->i () #:rest [rest (and/c (listof (and/c string? (λ ([n : String]) (<= (string-length n) 20)))) distinct)]
+             [result state?])])
  ;; (->* () #:rest (Listof String) State)
  ;; Precondition: strings are unique
  ;; Precondition: strings have fewer than 20 characters
+
+ Administrator%
+ Player%
+ Player
+ Turn%
+ Decisions
+ State
+ RunResult
+ Strategy
  )
 
-(: score? (-> Any Boolean))
-(define (score? x*)
-  (and (list? x*)
-       (for/fold : (U Boolean Cash)
-                 ([prev : (U Boolean Cash) #t])
-                 ([x : Any (in-list x*)])
-         (and prev
-              (list? x)
-              (not (null? x)) (not (null? (cdr x))) (null? (cddr x))
-              (string? (car x))
-              (cash? (cdr x))
-              (if (cash? prev) (>= (assert prev real?) (assert (cdr x) real?)) #t)
-              (assert (cdr x) exact-nonnegative-integer?)))
-       #t))
-;; (define score/c (and/c (listof (list/c string? cash?)) (sorted >= #:key second)))
+;; MIGR: None of the typed code uses this, but it was migrated to do the checks
+;; that score/c does (sortedness). Now, though, it's just a type test. If it did
+;; have any clients, then we wouldn't be able to change the meaning of score?
+;; without breaking them.
+(define-predicate score? Score)
+
 (define-type Score (Listof (List String Cash)))
 ;; also, sorted in order of cash, descending
+
+;; TODO: None of the typed code uses this as a predicate, but we need (as a
+;; larger issue, not for this migration) to support generating FlatCon's via
+;; and/c as well as or/c. Right now, they always produce a Con.
+(: score/c (Con Any Score))
+(define score/c
+  ;; MIGR: have to instantiate sorted/k here because and/c and the type
+  ;; annotation don't influence the constraint generation's expected type
+  (and/c score? ((inst sorted/k (List String Cash) Cash) >= second)))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; IMPLEMENTATION: 
@@ -141,7 +192,7 @@
 (require
  benchmark-util
  "../base/types.rkt"
- "board-adapted.rkt"
+ "board.rkt"
  )
 (require/typed/check "basics.rkt"
   (ALL-HOTELS (Listof Hotel))
@@ -242,14 +293,6 @@
 (define (player0 n t1 t2 t3 t4 t5 t6 x)
      (player n (list t1 t2 t3 t4 t5 t6) CASH0 player-shares0 x))
 
-(: ext:*create-player (-> String Cash Shares (Listof Tile) Player))
-(define (ext:*create-player name cash shares tiles)
-  (unless (distinct tiles)
-    (error '*create-player (format "Precondition: distinct tiles ~a" tiles)))
-  (unless (<= STARTER-TILES# (length tiles))
-    (error '*create-player (format "Precondition: <=~a tiles in ~a" STARTER-TILES# tiles)))
-  (*create-player name cash shares tiles))
-
 (: *create-player (-> String Cash Shares (Listof Tile) Player))
 (define (*create-player name cash shares tiles)
   (player name tiles cash shares #f))
@@ -314,12 +357,6 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; FUNCTIONS: placing a tile and all consequences 
 
-(: ext:state0 (-> Player * State))
-(define (ext:state0 . p)
-  (unless (distinct (apply append (map player-tiles p)))
-    (error 'state0 (format "Precondition: distinct tiles for players ~a" p)))
-  (apply state0 p))
-
 (: state0 (-> Player * State))
 (define (state0 . p)
   (define tiles-owned-by-players (apply append (map player-tiles p)))
@@ -330,13 +367,6 @@
 (define (state-sub-shares s bad-shares)
   (struct-copy state s (shares (shares-minus (state-shares s) bad-shares))))
 
-(: ext:*cs0 (-> String * State))
-(define (ext:*cs0 . names)
-  (unless (distinct names)
-    (error '*cs0 (format "Precondition: (distinct ~a)" names)))
-  (unless (andmap (lambda ([s : String]) (<= (string-length s) 20)) names)
-    (error 'cs0 (format "Precondition: strings with <=20 characters ~a" names)))
-  (apply *cs0 names))
   
 ;; Player *-> State 
 ;; create players with given names, assigning random tiles from the full pool
@@ -352,14 +382,6 @@
       [else (define first-six (take tiles STARTER-TILES#))
             (define player1 (player (first names) first-six CASH0 player-shares0 #f))
             (loop (rest names) (drop tiles STARTER-TILES#) (cons player1 players))])))
-
-(: ext:*create-state (-> Board (Listof Player) State))
-(define (ext:*create-state b lp)
-  (unless (shares-combinable? (map player-shares lp))
-    (error 'create-state))
-  (unless (distinct (apply append (board-tiles b) (map player-tiles lp)))
-    (error 'create-state "precond"))
-  (*create-state b lp))
 
 ;; Board [Listof Player] -> State
 ;; create a state by subtracting the tiles on the board and the players from the pool
@@ -500,12 +522,6 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; FUNCTIONS: external 
 
-(: ext:state-move-tile (-> State Tile State))
-(define (ext:state-move-tile s t)
-  (unless (member t (state-tiles s))
-    (error 'state-move-tile (format "Precondition: tile ~a must be a member of ~a" t (state-tiles s))))
-  (state-move-tile s t))
-
 (: state-move-tile (-> State Tile State))
 (define (state-move-tile s t)
   (match-define (state _board players tiles _hotels _shares _bad) s)
@@ -531,19 +547,6 @@
 (define (state-current-player s)
   (first (state-players s)))
 
-(: ext:state-buy-shares (-> State (Listof Hotel) State))
-(define (ext:state-buy-shares s sh)
-  (unless (shares-order? sh)
-    (error 'state-buy-shares "Preciondignos"))
-  (unless (affordable? (state-board s)
-                       sh
-                       (player-money (state-current-player s)))
-    (error 'state-buy-shares (format "Precondition: player ~a cannot afford to buy ~a" (state-current-player s) sh)))
-  (unless (let ([banker-s-shares (state-shares s)])
-            (shares-available? banker-s-shares sh))
-    (error 'state-buy-shares (format "shares ~a are not available")))
-  (state-buy-shares s sh))
-
 (: state-buy-shares (-> State (Listof Hotel) State))
 (define (state-buy-shares s sh)
   (match-define (state board players _tiles _hotels shares _bad) s)
@@ -553,12 +556,6 @@
                                  ((s : Shares shares))
                                  ((h : Hotel sh))
                          (shares-- s h)))))
-
-(: ext:state-return-shares (->* [State (Listof (List Player (Listof (List Hotel Boolean))))] [Board] State))
-(define (ext:state-return-shares s decisions (board (state-board s)))
-  (unless (= (length (state-players s)) (length decisions))
-    (error 'state-return-shares (format "Precondition: need same number of players and decisions")))
-  (state-return-shares s decisions board))
 
 (: state-return-shares (->* [State (Listof (List Player (Listof (List Hotel Boolean))))] [Board] State))
 (define (state-return-shares s decisions (board (state-board s)))

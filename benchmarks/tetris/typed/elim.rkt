@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data.rkt")
 (require benchmark-util)
 (require/typed/check "bset.rkt"
    [blocks-move (-> Real Real BSet BSet)]
@@ -23,4 +23,5 @@
                             (blocks-move 0 offset (blocks-row
                                                    bs i)))]))
 (provide
- eliminate-full-rows)
+ (contract-out
+  [eliminate-full-rows (BSET/C . ->/c . BSET/C)]))

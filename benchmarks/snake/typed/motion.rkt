@@ -1,16 +1,8 @@
 #lang typed/racket
 
-(require benchmark-util
-         "data-adaptor.rkt")
-
-(require/typed/check "const.rkt"
-                     [BOARD-WIDTH Integer]
-                     [BOARD-HEIGHT Integer])
-(require/typed/check "data.rkt"
-                     [posn=? (Posn Posn . -> . Boolean)])
-(require/typed/check "motion-help.rkt"
-                     [snake-slither (Snake . -> . Snake)]
-                     [snake-grow    (Snake . -> . Snake)])
+(require "data.rkt"
+         "const.rkt"
+         "motion-help.rkt")
 
 (provide reset!)
 (define r (make-pseudo-random-generator)) 
@@ -50,6 +42,8 @@
   (define j (add1 (random (sub1 BOARD-HEIGHT) r)))
   (world (snake-grow (world-snake w))
          (posn i j)))
+
 (provide
- world-change-dir
- world->world)
+ (contract-out
+  [world-change-dir (WORLD/C DIR/C . ->/c . WORLD/C)]
+  [world->world (WORLD/C . ->/c . WORLD/C)]))

@@ -1,15 +1,9 @@
 #lang typed/racket
 
-(require benchmark-util
-         "data-adaptor.rkt")
-(require/typed/check "const.rkt"
-                     [WORLD (-> World)])
-(require/typed/check "motion.rkt"
-                     [reset!           (-> Void)]
-                     [world->world     (World . -> . World)])
-(require/typed/check "handlers.rkt"
-                     [handle-key (World String . -> . World)]
-                     [game-over? (World . -> . Boolean)])
+(require "data.rkt"
+         "const.rkt"
+         "handlers.rkt"
+         "motion.rkt")
 
 (: replay : World (Listof Any) -> Void)
 (define (replay w0 hist)

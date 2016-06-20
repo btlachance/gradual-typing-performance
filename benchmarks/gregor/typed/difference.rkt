@@ -2,39 +2,39 @@
 
 ;; Time deltas
 
-(provide;/contract
- datetime-months-between      ;(-> datetime? datetime? exact-integer?)]
- datetime-days-between        ;(-> datetime? datetime? exact-integer?)]
- datetime-nanoseconds-between ;(-> datetime? datetime? exact-integer?)])
+(provide/contract
+ [datetime-months-between      (->/c datetime? datetime? exact-integer?)]
+ [datetime-days-between        (->/c datetime? datetime? exact-integer?)]
+ [datetime-nanoseconds-between (->/c datetime? datetime? exact-integer?)]
 )
 
 ;; -----------------------------------------------------------------------------
 
 (require
-  benchmark-util
+  ;benchmark-util
   racket/match
   "core-adapter.rkt"
   "gregor-adapter.rkt"
-  (only-in racket/math exact-floor))
-(require/typed/check
   "ymd.rkt"
-    [days-in-month (-> Natural Month (U 28 29 30 31))]
-  )
-(require/typed/check "hmsn.rkt"
-    [NS/DAY Natural]
-)
-(require/typed/check "date.rkt"
+  "hmsn.rkt"
+  "date.rkt"
+  "datetime.rkt"
+  (only-in racket/math exact-floor))
+#;(require/typed/check
+  "ymd.rkt"
+    [days-in-month (-> Natural Month (U 28 29 30 31))])
+#;(require/typed/check "hmsn.rkt"
+    [NS/DAY Natural])
+#;(require/typed/check "date.rkt"
     [date->ymd (-> Date YMD)]
-    [date (->* (Natural) (Month Natural) Date)]
-)
-(require/typed/check "datetime.rkt"
+    [date (->* (Natural) (Month Natural) Date)])
+#;(require/typed/check "datetime.rkt"
     [datetime<? (-> DateTime DateTime Boolean)]
     [datetime->date (-> DateTime Date)]
     [date+time->datetime (-> Date Time DateTime)]
     [datetime->time (-> DateTime Time)]
     [datetime->jd (-> DateTime Exact-Rational)]
-    [datetime (->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)]
-)
+    [datetime (->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)])
 
 ;; =============================================================================
 

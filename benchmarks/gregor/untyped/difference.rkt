@@ -1,11 +1,12 @@
 #lang racket/base
 
 ;; Time deltas
-
-(provide;/contract
- datetime-months-between      ;(-> datetime? datetime? exact-integer?)]
- datetime-days-between        ;(-> datetime? datetime? exact-integer?)]
- datetime-nanoseconds-between ;(-> datetime? datetime? exact-integer?)])
+(require racket/contract/base)
+(provide
+ (contract-out
+ [datetime-months-between      (-> datetime? datetime? exact-integer?)]
+ [datetime-days-between        (-> datetime? datetime? exact-integer?)]
+ [datetime-nanoseconds-between (-> datetime? datetime? exact-integer?)])
 )
 
 ;; -----------------------------------------------------------------------------
@@ -15,7 +16,8 @@
   racket/match
   "core-structs.rkt"
   "gregor-structs.rkt"
-  (only-in racket/math exact-floor))
+  (only-in racket/math exact-floor)
+  "datetime.rkt")
 (require (only-in
   "ymd.rkt"
     days-in-month ;(-> Natural Month (U 28 29 30 31))]
@@ -26,14 +28,6 @@
 (require (only-in "date.rkt"
     date->ymd ;(-> Date YMD)]
     date ;(->* (Natural) (Month Natural) Date)]
-))
-(require (only-in "datetime.rkt"
-    datetime<? ;(-> Any Any Boolean)]
-    datetime->date ;(-> DateTime Date)]
-    date+time->datetime ;(-> Date Time DateTime)]
-    datetime->time ;(-> DateTime Time)]
-    datetime->jd ;(-> DateTime Exact-Rational)]
-    datetime ;(->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)]
 ))
 
 ;; =============================================================================

@@ -1,22 +1,22 @@
 #lang typed/racket/base
 
 (require
-  benchmark-util
+  ;benchmark-util
   "../base/types.rkt"
   "gregor-adapter.rkt"
   "tzinfo-adapter.rkt"
 )
-(require/typed/check "date.rkt"
+#;(require/typed/check "date.rkt"
     [date=? (-> Date Date Boolean)]
     [date (->* (Natural) (Month Natural) Date)]
     [date->iso8601 (-> Date String)]
 )
-(require/typed/check "time.rkt"
+#;(require/typed/check "time.rkt"
     [time=? (-> Time Time Boolean)]
     [time->iso8601 (-> Time String)]
     [make-time (->* (Integer) (Integer Integer Integer) Time)]
 )
-(require/typed/check "datetime.rkt"
+#;(require/typed/check "datetime.rkt"
     [datetime=? (-> DateTime DateTime Boolean)]
     [datetime<=? (-> DateTime DateTime Boolean)]
     [datetime (->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)]
@@ -25,14 +25,14 @@
     [datetime->iso8601 (-> DateTime String)]
     [datetime->posix (-> DateTime Exact-Rational)]
 )
-(require/typed/check "moment.rkt"
+#;(require/typed/check "moment.rkt"
     [moment (->* (Natural) (Month Natural Natural Natural Natural Natural #:tz (U tz #f) #:resolve-offset (-> (U tzgap tzoverlap) DateTime (U String #f) (U #f Moment) Moment)) Moment)]
     [moment=? (-> Moment Moment Boolean)]
     [UTC String]
     [moment->iso8601/tzid (-> Moment String)]
     [posix->moment (-> Exact-Rational tz Moment)]
 )
-(require/typed/check "clock.rkt"
+#;(require/typed/check "clock.rkt"
     [current-clock (Parameterof (-> Exact-Rational))]
     [today/utc (-> Date)]
     [today (->* () (#:tz (U tz #f)) Date)]
@@ -43,11 +43,17 @@
     [now/moment/utc (-> Moment)]
     [now/moment (-> Moment)]
 )
-(require/typed/check "difference.rkt"
+#;(require/typed/check "difference.rkt"
     [datetime-months-between (-> DateTime DateTime Integer)]
     [datetime-days-between (-> DateTime DateTime Integer)]
     [datetime-nanoseconds-between (-> DateTime DateTime Integer)]
 )
+(require "date.rkt"
+         "time.rkt"
+         "datetime.rkt"
+         "moment.rkt"
+         "clock.rkt"
+         "difference.rkt")
 
 ;; =============================================================================
 
@@ -84,7 +90,7 @@
 (: RANDOM-DATES (-> (Listof DateTime)))
 (define (RANDOM-DATES)
   (list
-    (datetime 324       2   1    4      32     66         23)
+    (datetime 324       2   1    4      32     59         23)
     (datetime   6       9  12    0      55      6          8)
     (datetime 1111     12  30    8      48     11         44)
     (datetime  32       5   8   12       2     41         39) (datetime  6 6 6 6 6 6 6)
@@ -92,10 +98,10 @@
     (datetime  1251 3 18 6)
     (datetime 1386 2 1 0)
     (datetime 123 4 5 12 53)
-    (datetime 2002 11 42 32)
-    (datetime 777 7 77 77 77)
+    (datetime 2002 11 30 23)
+    (datetime 777 7 22 22 22)
     (datetime  1 2 3 4 5 6 7)
-    (datetime 9999     12  30   30      30     30         30)
+    (datetime 9999     12  30   22      30     30         30)
 ))
 
 ;; -- tests

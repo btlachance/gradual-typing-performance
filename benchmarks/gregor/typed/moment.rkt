@@ -5,68 +5,75 @@
 ;; Need the requires on top to stop syntax errors; opaques must
 ;; come lexically before their use
 (require
-  benchmark-util
+  ;benchmark-util
   "../base/types.rkt"
   "gregor-adapter.rkt"
   racket/match
   (only-in racket/math exact-round)
   "tzinfo-adapter.rkt"
+  "hmsn.rkt"
+  "moment-base.rkt"
+  "offset-resolvers.rkt"
+  "ymd.rkt"
+  "datetime.rkt"
 )
-(require/typed/check "hmsn.rkt"
+#;(require/typed/check "hmsn.rkt"
     [NS/SECOND Natural]
 )
-(require/typed/check "datetime.rkt"
+#;(require/typed "datetime.rkt"
     [datetime (->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)]
     [datetime->posix (-> DateTime Exact-Rational)]
     [posix->datetime (-> Exact-Rational DateTime)]
     [datetime->jd (-> DateTime Exact-Rational)]
     [datetime-add-seconds (-> DateTime Integer DateTime)]
 )
-(require/typed/check "moment-base.rkt"
-    [make-moment (-> DateTime Integer (U String #f) Moment)]
-    [moment->iso8601 (-> Moment String)]
-    [moment->iso8601/tzid (-> Moment String)]
+#;(require/typed "moment-base.rkt"
+  [make-moment (-> DateTime Integer (U String #f) Moment)]
+  [moment->iso8601 (-> Moment String)]
+  [moment->iso8601/tzid (-> Moment String)]
 )
-(require/typed/check "offset-resolvers.rkt"
+#;(require/typed "offset-resolvers.rkt"
     [resolve-offset/raise (-> (U tzgap tzoverlap) DateTime (U String #f) (U Moment #f) Moment)]
 )
-
+(define moment? Moment?)
 ;; -----------------------------------------------------------------------------
 
-(provide;/contract
- current-timezone       ;(parameter/c tz/c)]
- moment                 ;(->i ([year exact-integer?])
-                        ;      ([month (integer-in 1 12)]
-                        ;       [day (year month) (day-of-month/c year month)]
-                        ;       [hour (integer-in 0 23)]
-                        ;       [minute (integer-in 0 59)]
-                        ;       [second (integer-in 0 59)]
-                        ;       [nanosecond (integer-in 0 (sub1 NS/SECOND))]
-                        ;       #:tz [tz tz/c]
-                        ;       #:resolve-offset [resolve offset-resolver/c])
-                        ;      [res moment?])]
- datetime+tz->moment    ;(-> datetime? tz/c offset-resolver/c moment?)]
- moment->iso8601        ;(-> moment? string?)]
- moment->iso8601/tzid   ;(-> moment? string?)]
- moment->datetime/local ;(-> moment? datetime?)]
- moment->utc-offset     ;(-> moment? exact-integer?)]
- moment->timezone       ;(-> moment? tz/c)]
- moment->tzid           ;(-> moment? (or/c string? #f))]
- moment->jd             ;(-> moment? rational?)]
- moment->posix          ;(-> moment? rational?)]
- posix->moment          ;(-> rational? tz/c moment?)]
- moment-add-nanoseconds ;(-> moment? exact-integer? moment?)]
- moment-in-utc          ;(-> moment? moment?)]
- timezone-adjust        ;(-> moment? tz/c moment?)]
- timezone-coerce        ;(->i ([m moment?]
-                        ;       [z tz/c])
-                        ;      (#:resolve-offset [r offset-resolver/c])
-                        ;      [res moment?])]
- moment=?               ;(-> moment? moment? boolean?)]
- moment<?               ;(-> moment? moment? boolean?)]
- moment<=?              ;(-> moment? moment? boolean?)]
- UTC                    ;tz/c]
-)
+(provide
+ moment->iso8601 ;; (->/c moment? string?)
+ moment->iso8601/tzid ;; (->/c moment? string?)
+ (contract-out
+  [current-timezone       (parameter/c (or/c tz/c #f))]
+  [moment?                (->/c any/c boolean?)]
+  [moment                 (->i ([year natural-number/c])
+                               ([month month?]
+                                [day (year month) (day-of-month/c year month)]
+                                [hour (integer-in 0 23)]
+                                [minute (integer-in 0 59)]
+                                [second (integer-in 0 59)]
+                                [nanosecond (integer-in 0 (sub1 NS/SECOND))]
+                                #:tz [tz tz/c]
+                                #:resolve-offset [resolve offset-resolver/c])
+                               [res moment?])]
+  [datetime+tz->moment    (->/c datetime? tz/c offset-resolver/c moment?)]
+  [moment->datetime/local (->/c moment? datetime?)]
+  [moment->utc-offset     (->/c moment? exact-integer?)]
+  [moment->timezone       (->/c moment? tz/c)]
+  [moment->tzid           (->/c moment? (or/c string? #f))]
+  [moment->jd             (->/c moment? rational?)]
+  [moment->posix          (->/c moment? rational?)]
+  [posix->moment          (->/c (and/c rational? exact?) tz/c moment?)]
+  [moment-add-nanoseconds (->/c moment? natural-number/c moment?)]
+  [moment-in-utc          (->/c moment? moment?)]
+  [timezone-adjust        (->/c moment? tz/c moment?)]
+  [timezone-coerce        (->i ([m moment?]
+                                [z tz/c])
+                               (#:resolve-offset [r offset-resolver/c])
+                               [res moment?])]
+  [moment=?               (->/c moment? moment? boolean?)]
+  [moment<?               (->/c moment? moment? boolean?)]
+  [moment<=?              (->/c moment? moment? boolean?)]
+  [UTC                    tz/c]
+  ))
 
 ;; =============================================================================
 
@@ -148,7 +155,7 @@
   (posix->moment (+ (moment->posix m) (* n (/ 1 NS/SECOND)))
                  (moment->timezone m)))
 
-(: timezone-adjust (-> Moment (U Natural String) Moment))
+(: timezone-adjust (-> Moment tz Moment))
 (define (timezone-adjust m z)
   (: dt DateTime)
   (define dt (error 'foo));(Moment-datetime/local m))
@@ -166,7 +173,7 @@
          (define local (datetime-add-seconds dt/utc z))
          (make-moment local z #f)]))
 
-(: timezone-coerce (->* [Moment (U Natural String)]
+(: timezone-coerce (->* [Moment tz]
                         (#:resolve-offset (-> (U tzgap tzoverlap) DateTime (U String #f) (U #f Moment) Moment))
                         Moment))
 (define (timezone-coerce m z #:resolve-offset [resolve resolve-offset/raise])

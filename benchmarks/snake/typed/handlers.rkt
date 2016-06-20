@@ -1,13 +1,9 @@
 #lang typed/racket
 ;; Movie handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require benchmark-util
-         "data-adaptor.rkt")
-(require/typed/check "collide.rkt"
-                     [snake-wall-collide? (Snake . -> . Boolean)]
-                     [snake-self-collide? (Snake . -> . Boolean)])
-(require/typed/check "motion.rkt"
-                     [world-change-dir (World Dir . -> . World)])
+(require "data.rkt"
+         "collide.rkt"
+         "motion.rkt")
 
 (: handle-key : (World String . -> . World) )
 (define (handle-key w ke)
@@ -23,5 +19,6 @@
       (snake-self-collide? (world-snake w))))
 
 (provide
- handle-key 
- game-over?)
+ (contract-out
+  [handle-key (WORLD/C string? . ->/c . WORLD/C)]
+  [game-over? (WORLD/C . ->/c . boolean?)]))

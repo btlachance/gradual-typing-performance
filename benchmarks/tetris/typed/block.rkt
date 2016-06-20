@@ -1,9 +1,7 @@
 #lang typed/racket
 
-(require "base-types.rkt")
 (require benchmark-util)
-(require/typed/check "data.rkt"
-                     [posn=? (-> Posn Posn Boolean)])
+(require "data.rkt")
 
 ;; Determines if two blocks are the same (ignoring color).
 (: block=? (-> Block Block Boolean))
@@ -30,7 +28,8 @@
   (block-rotate-ccw c (block-rotate-ccw c (block-rotate-ccw c b))))
 
 (provide
- block-rotate-ccw
- block-rotate-cw
- block=?
- block-move)
+ (contract-out
+  [block-rotate-ccw (POSN/C BLOCK/C . ->/c . BLOCK/C)]
+  [block-rotate-cw (POSN/C BLOCK/C . ->/c . BLOCK/C)]
+  [block=? (BLOCK/C BLOCK/C . ->/c . boolean?)]
+  [block-move (real? real? BLOCK/C . ->/c . BLOCK/C)]))

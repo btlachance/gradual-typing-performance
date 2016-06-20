@@ -82,7 +82,7 @@
 ))
 (define (RANDOM-DATES)
   (list
-    (datetime 324       2   1    4      32     66         23)
+    (datetime 324       2   1    4      32     59         23)
     (datetime   6       9  12    0      55      6          8)
     (datetime 1111     12  30    8      48     11         44)
     (datetime  32       5   8   12       2     41         39)
@@ -91,10 +91,10 @@
     (datetime  1251 3 18 6)
     (datetime 1386 2 1 0)
     (datetime 123 4 5 12 53)
-    (datetime 2002 11 42 32)
-    (datetime 777 7 77 77 77)
+    (datetime 2002 11 30 23)
+    (datetime 777 7 22 22 22)
     (datetime  1 2 3 4 5 6 7)
-    (datetime 9999     12  30   30      30     30         30)
+    (datetime 9999     12  30   22      30     30         30)
 ))
 
 ;; -- tests

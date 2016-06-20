@@ -1,12 +1,7 @@
 #lang typed/racket
 
-(require benchmark-util
-         "data-adaptor.rkt")
-(require/typed/check "const.rkt"
-                     [BOARD-WIDTH Integer]
-                     [BOARD-HEIGHT Integer])
-(require/typed/check "data.rkt"
-                     [posn=? (Posn Posn . -> . Boolean)])
+(require "data.rkt"
+         "const.rkt")
 
 ;; Is the snake colliding with any of the walls?
 (: snake-wall-collide? : (Snake . -> . Boolean))
@@ -30,6 +25,8 @@
   (cond [(empty? segs) #f]
         [else (or (posn=? (car segs) h)
                   (segs-self-collide? h (cdr segs)))]))
+
 (provide
- snake-wall-collide?
- snake-self-collide?)
+ (contract-out
+  [snake-wall-collide? (SNAKE/C . ->/c . boolean?)]
+  [snake-self-collide? (SNAKE/C . ->/c . boolean?)]))

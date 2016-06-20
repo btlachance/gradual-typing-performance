@@ -2,20 +2,21 @@
 
 ;; Working with Time objects
 
-(provide;/contract
- make-time            ;(->i ([hour (integer-in 0 23)])
-                 ;      ([minute (integer-in 0 59)]
-                 ;       [second (integer-in 0 59)]
-                 ;       [nanosecond (integer-in 0 (sub1 NS/SECOND))])
-                 ;      [t time?])]
- time->hmsn     ; (-> time? HMSN?)]
- time->ns       ; (-> time? (integer-in 0 (sub1 NS/DAY)))]
- day-ns->time   ; (-> (integer-in 0 (sub1 NS/DAY)) time?)]
- time->iso8601  ; (-> time? string?)]
- time=?         ; (-> time? time? boolean?)]
- time<?         ; (-> time? time? boolean?)]
- time<=?        ; (-> time? time? boolean?)]
-)
+(provide
+ (contract-out
+  [time?          (->/c any/c boolean?)]
+  [make-time      (->i ([hour (integer-in 0 23)])
+                       ([minute (integer-in 0 59)]
+                        [second (integer-in 0 59)]
+                        [nanosecond (integer-in 0 (sub1 NS/SECOND))])
+                       [t time?])]
+  [time->hmsn     (->/c time? HMSN?)]
+  [time->ns       (->/c time? (integer-in 0 (sub1 NS/DAY)))]
+  [day-ns->time   (->/c (integer-in 0 (sub1 NS/DAY)) time?)]
+  [time->iso8601  (->/c time? string?)]
+  [time=?         (->/c time? time? boolean?)]
+  [time<?         (->/c time? time? boolean?)]
+  [time<=?        (->/c time? time? boolean?)]))
 
 ;; -----------------------------------------------------------------------------
 
@@ -24,8 +25,9 @@
   (only-in racket/format ~r)
   "core-adapter.rkt"
   "gregor-adapter.rkt"
+  "hmsn.rkt"
   racket/match)
-(require/typed/check
+#;(require/typed/check
   "hmsn.rkt"
     [hmsn->day-ns (-> HMSN Natural)]
     [day-ns->hmsn (-> Natural HMSN)]
@@ -46,7 +48,7 @@
 (define (time-write-proc t out mode)
   (fprintf out "#<time ~a>" (time->iso8601 t)))
 
-(: time? (-> Any Boolean))
+(: time? (-> Any Boolean : Time))
 (define time? Time?)
 
 (: time->hmsn (-> Time HMSN))

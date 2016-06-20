@@ -12,12 +12,13 @@
 ;; -----------------------------------------------------------------------------
 
 (require
-  benchmark-util
+  ;benchmark-util
+  "datetime.rkt"
   racket/match
   "gregor-adapter.rkt"
   (only-in racket/format ~r)
 )
-(require/typed/check "datetime.rkt"
+#;(require/typedcheck "datetime.rkt"
     [datetime->iso8601 (-> DateTime String)]
 )
 

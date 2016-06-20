@@ -9,19 +9,32 @@
   (and (= (posn-x p1) (posn-x p2))
        (= (posn-y p1) (posn-y p2))))
 
+(define COLOR/C symbol?)
+(define POSN/C posn?)
+(define BLOCK/C block?)
+(define BSET/C (listof BLOCK/C))  
+(define TETRA/C tetra?)
+(define WORLD/C world?)
+
 (provide
- (struct-out block)
- (struct-out posn)
- (struct-out tetra)
- (struct-out world)
- posn=?)
-#;
-(provide
- (contract-out
-  (struct block ([x real?] [y real?] [color COLOR/C]))
-  (struct posn ([x real?] [y real?]))
-  (struct tetra ([center POSN/C] [blocks BSET/C]))
-  (struct world ([tetra TETRA/C] [blocks BSET/C]))       
+(contract-out
+  [block (-> real? real? COLOR/C block?)]
+  [block-x (-> block? real?)]
+  [block-y (-> block? real?)]
+  [block-color (-> block? COLOR/C)]
+
+  [posn (-> real? real? posn?)]
+  [posn-x (-> posn? real?)]
+  [posn-y (-> posn? real?)]
+
+  [tetra (-> POSN/C BSET/C tetra?)]
+  [tetra-center (-> tetra? POSN/C)]
+  [tetra-blocks (-> tetra? BSET/C)]
+  
+  [world (-> TETRA/C BSET/C world?)]
+  [world-tetra (-> world? TETRA/C)]
+  [world-blocks (-> world? BSET/C)]
+
   [posn=? (POSN/C POSN/C . -> . boolean?)])
  COLOR/C
  POSN/C

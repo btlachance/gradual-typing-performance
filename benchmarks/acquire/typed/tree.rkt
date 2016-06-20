@@ -6,13 +6,16 @@
   generate-tree
   tree-next
   hand-out?
+  ATree%
+  Placed%
+  LPlaced%
 )
 
 (require
   benchmark-util
   "../base/types.rkt"
-  "board-adapted.rkt"
-  "state-adapted.rkt"
+  "board.rkt"
+  "state.rkt"
 )
 (require/typed/check "basics.rkt"
   (shares-available? (-> Shares (Listof Hotel) Boolean))
@@ -99,7 +102,7 @@
 
     ;; template hook pattern: template
     (define/public (founding n order-policies)
-      (unless (shares-order? order-policies)
+      (unless (andmap shares-order? order-policies)
         (error 'atree-founding "Precondition"))
       (traversal n order-policies (is-action FOUNDING)))
 

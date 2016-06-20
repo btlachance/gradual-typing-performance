@@ -27,7 +27,8 @@
   (block-rotate-ccw c (block-rotate-ccw c (block-rotate-ccw c b))))
 
 (provide
- block-rotate-ccw
- block-rotate-cw
- block=?
- block-move)
+ (contract-out
+  [block-rotate-ccw (POSN/C BLOCK/C . -> . BLOCK/C)]
+  [block-rotate-cw (POSN/C BLOCK/C . -> . BLOCK/C)]
+  [block=? (BLOCK/C BLOCK/C . -> . boolean?)]
+  [block-move (real? real? BLOCK/C . -> . BLOCK/C)]))
