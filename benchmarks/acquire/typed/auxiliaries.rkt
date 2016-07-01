@@ -1,32 +1,11 @@
 #lang typed/racket/base
 
 (provide
- (contract-out
-  [randomly-pick (->/c (listof any/c) any/c)]
-
-  [distinct (->/c list? boolean?)]
-  ;; for small lists O(n^2)
-
-  ;; (->* [(Listof Any) (-> Any Real)] [#:info (-> Any Any)] (Listof (Listof Any)))
-  ;; Precondition: input list is sorted vis <= or >=
-
-  [aux:partition
-   (->i ([l (key) (and/c (listof any/c)
-                         (or/c
-                          (sorted/k <= key)
-                          (sorted/k >= key)))]
-         [key (->/c any/c real?)]
-         (info (->/c any/c any/c)))
-        (partitions (listof (listof any/c))))]
-
-  [sorted
-   (->i ((cmp (->/c any/c any/c any/c)))
-        (ok? (->/c list? any/c)))]
-
-  [sorted/k
-   (->i ((cmp (->/c any/c any/c any/c))
-         (key (->/c any/c any/c)))
-        (ok? (->/c list? any/c)))])
+ randomly-pick
+ sorted
+ sorted/k
+ distinct
+ aux:partition
  ==>
  )
 
