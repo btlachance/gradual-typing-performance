@@ -1,7 +1,7 @@
 #!/bin/bash
 #############################################################################
 # Parameters
-RKT=/usr/local/racket/racket/bin/
+RKT=/usr/local/racket/bin/
 
 ## Default jobs: compute number of cores, divide by 2
 if hash nproc 2>/dev/null; then

@@ -259,7 +259,7 @@
       [else
        ((*PERMUTE*)
         (mk-configurations basepath entry-point))]))
-  (define hot-proc (make-temperature-monitor))
+  ;; (define hot-proc (make-temperature-monitor))
   ;; allocate a slice of the configurations per job
   (define slice-size (ceiling (/ (length configurations) jobs)))
   (define thread*
@@ -302,7 +302,7 @@
                (write-results (reverse ut*)))))))))
   ;; synchronize on all jobs
   (for ([thd (in-list thread*)]) (thread-wait thd))
-  (kill-temperature-monitor hot-proc)
+  ;; (kill-temperature-monitor hot-proc)
   #t)
 
 (define (write-results times [dir (current-directory)])
