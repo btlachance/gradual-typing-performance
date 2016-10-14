@@ -1,4 +1,5 @@
 #lang typed/racket/base
+(require typed/racket/contract)
 
 ;; Front-end:
 ;; Working with current clock

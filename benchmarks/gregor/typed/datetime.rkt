@@ -1,4 +1,5 @@
 #lang typed/racket/base
+(require typed/racket/contract)
 
 ;; Working with DateTime objects
 ;; (i.e. dates and times at the same time)

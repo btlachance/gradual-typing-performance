@@ -1,4 +1,5 @@
 #lang typed/racket/base
+(require typed/racket/contract)
 
 (require/typed/provide "../base/tzinfo/main.rkt"
   [system-tzid (-> (U tz #f))]
